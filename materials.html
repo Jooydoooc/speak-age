@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#09090b" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Speak_Age" />
+<meta name="format-detection" content="telephone=no" />
+<link rel="manifest" href="/manifest.json" />
+<link rel="apple-touch-icon" href="/icon-192.svg" />
+<link rel="icon" type="image/svg+xml" href="/icon-192.svg" />
+<title>Study Materials — Speak_Age</title>
+<link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+<header class="nav">
+  <div class="container nav-inner">
+    <a href="/index.html" class="logo"><svg class="logo-mark" viewBox="0 0 512 512" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="42" stroke-linecap="round" fill="none"><circle cx="256" cy="248" r="84"/><ellipse cx="256" cy="256" rx="180" ry="58" transform="rotate(-18 256 256)"/><path d="M 340 140 Q 358 118 380 132"/><path d="M 374 118 Q 394 100 416 118"/></g></svg><span class="logo-text">Speak<span class="underscore">_</span>Age</span></a>
+    <ul class="nav-links">
+      <li><a href="/topics.html">Topics</a></li>
+      <li><a href="/shadowing.html">Shadowing</a></li>
+      <li><a href="/exercises.html">Exercises</a></li>
+      <li><a href="/materials.html">Materials</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="/dashboard.html" class="btn btn-ghost">Dashboard</a>
+    </div>
+    <button class="menu-toggle"><span></span></button>
+  </div>
+</header>
+
+<section class="page-head">
+  <div class="container">
+    <h1>Study Materials</h1>
+    <p>Vocabulary, idioms, band descriptors and grammar — all in one place.</p>
+  </div>
+</section>
+
+<div class="container">
+  <div class="filters" id="filters">
+    <button class="pill active" data-cat="all">All</button>
+    <button class="pill" data-cat="Vocabulary">Vocabulary</button>
+    <button class="pill" data-cat="Idioms">Idioms</button>
+    <button class="pill" data-cat="Band descriptors">Band descriptors</button>
+    <button class="pill" data-cat="Sample answers">Sample answers</button>
+    <button class="pill" data-cat="Grammar for speaking">Grammar for speaking</button>
+  </div>
+  <div class="cards-grid" id="materials"></div>
+</div>
+
+<footer>
+  <div class="container footer-inner">
+    <a href="/index.html" class="logo"><svg class="logo-mark" viewBox="0 0 512 512" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="42" stroke-linecap="round" fill="none"><circle cx="256" cy="248" r="84"/><ellipse cx="256" cy="256" rx="180" ry="58" transform="rotate(-18 256 256)"/><path d="M 340 140 Q 358 118 380 132"/><path d="M 374 118 Q 394 100 416 118"/></g></svg><span class="logo-text">Speak<span class="underscore">_</span>Age</span></a>
+    <ul class="footer-links"><li><a href="#">Privacy</a></li><li><a href="#">Terms</a></li><li><a href="#">Contact</a></li></ul>
+  </div>
+</footer>
+
+<script src="/js/main.js"></script>
+<script>
+(async function () {
+  const user = await window.requireAuth();
+  if (!user) return;
+
+  const grid = document.getElementById('materials');
+  const filters = document.getElementById('filters');
+  let materials = [];
+  let activeCat = 'all';
+
+  async function load() {
+    const { ok, data } = await window.api('/api/materials');
+    materials = ok ? (data.materials || []) : [];
+    render();
+  }
+
+  function esc(str) {
+    return String(str || '').replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[c]);
+  }
+
+  function render() {
+    const list = activeCat === 'all' ? materials : materials.filter(m => m.category === activeCat);
+    if (list.length === 0) {
+      grid.innerHTML = `<div style="padding:48px;color:var(--muted);text-align:center;grid-column:1/-1">No materials available.</div>`;
+      return;
+    }
+    grid.innerHTML = list.map(m => `
+      <div class="material-card">
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <div class="file-icon">PDF</div>
+          <div style="flex:1">
+            <div class="card-title">${esc(m.title)}</div>
+            <div class="card-meta">${esc(m.file_size || '')}</div>
+          </div>
+        </div>
+        <span class="badge">${esc(m.category)}</span>
+        <a class="btn btn-primary btn-sm" href="${esc(m.file_url)}" target="_blank" rel="noopener">Download</a>
+      </div>
+    `).join('');
+  }
+
+  filters.addEventListener('click', e => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    filters.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeCat = btn.getAttribute('data-cat');
+    render();
+  });
+
+  load();
+})();
+</script>
+</body>
+</html>

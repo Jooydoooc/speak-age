@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#09090b" />
+<title>Redirecting — Speak_Age</title>
+<meta http-equiv="refresh" content="0; url=/profile.html#content" />
+<link rel="manifest" href="/manifest.json" />
+<link rel="apple-touch-icon" href="/icon-192.svg" />
+<link rel="icon" type="image/svg+xml" href="/icon-192.svg" />
+<style>
+  html, body { background: #09090b; color: #71717a; font-family: -apple-system, system-ui, sans-serif; }
+  .wrap { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; text-align: center; }
+  a { color: #7c3aed; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div>
+    <p>The admin panel is now part of your profile.</p>
+    <p><a href="/profile.html#content">Go to /profile</a></p>
+  </div>
+</div>
+<script>location.replace('/profile.html' + (location.hash || '#content'));</script>
+</body>
+</html>

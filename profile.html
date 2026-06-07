@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#09090b" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Speak_Age" />
+<meta name="format-detection" content="telephone=no" />
+<link rel="manifest" href="/manifest.json" />
+<link rel="apple-touch-icon" href="/icon-192.svg" />
+<link rel="icon" type="image/svg+xml" href="/icon-192.svg" />
+<title>Profile — Speak_Age</title>
+<link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+<header class="nav">
+  <div class="container nav-inner">
+    <a href="/index.html" class="logo"><svg class="logo-mark" viewBox="0 0 512 512" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="42" stroke-linecap="round" fill="none"><circle cx="256" cy="248" r="84"/><ellipse cx="256" cy="256" rx="180" ry="58" transform="rotate(-18 256 256)"/><path d="M 340 140 Q 358 118 380 132"/><path d="M 374 118 Q 394 100 416 118"/></g></svg><span class="logo-text">Speak<span class="underscore">_</span>Age</span></a>
+    <ul class="nav-links">
+      <li><a href="/topics.html">Topics</a></li>
+      <li><a href="/shadowing.html">Shadowing</a></li>
+      <li><a href="/exercises.html">Exercises</a></li>
+      <li><a href="/materials.html">Materials</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="/dashboard.html" class="btn btn-ghost">Dashboard</a>
+    </div>
+    <button class="menu-toggle"><span></span></button>
+  </div>
+</header>
+
+<div class="container profile-shell">
+
+  <!-- Top-level tab strip -->
+  <div class="profile-tabstrip scroll-x" role="tablist">
+    <button class="profile-tab active" type="button" role="tab" data-ptab="profile">
+      <span class="profile-tab-icon" aria-hidden="true">👤</span> Profile
+    </button>
+    <button class="profile-tab" type="button" role="tab" data-ptab="progress" data-role-student>
+      <span class="profile-tab-icon" aria-hidden="true">📊</span> Progress
+    </button>
+    <button class="profile-tab" type="button" role="tab" data-ptab="content" data-role-staff>
+      <span class="profile-tab-icon" aria-hidden="true">📋</span> Content
+    </button>
+    <button class="profile-tab" type="button" role="tab" data-ptab="students" data-role-staff>
+      <span class="profile-tab-icon" aria-hidden="true">👥</span> Students
+    </button>
+    <button class="profile-tab" type="button" role="tab" data-ptab="stats" data-role-staff>
+      <span class="profile-tab-icon" aria-hidden="true">📈</span> Stats
+    </button>
+  </div>
+
+  <!-- ===== Profile tab ===== -->
+  <section class="profile-tab-panel active" data-ptab-panel="profile">
+    <div class="profile-card">
+      <div class="profile-card-avatar" id="profile-avatar-slot"></div>
+
+      <div class="profile-display-row" id="profile-display-row">
+        <h1 id="profile-display-name">Loading…</h1>
+        <span id="profile-role-badge"></span>
+        <button class="btn-icon-pencil" id="profile-edit-toggle" title="Edit name" aria-label="Edit name">✎</button>
+      </div>
+
+      <form class="profile-edit-form" id="profile-edit-form" hidden>
+        <div class="form-row">
+          <input type="text" name="display_name" id="profile-name-input" required maxlength="100" placeholder="Your name" />
+        </div>
+        <div id="profile-msg"></div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-ghost" id="profile-cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="profile-save">Save changes</button>
+        </div>
+      </form>
+
+      <div class="profile-email" id="profile-email">—</div>
+
+      <button class="btn-signout" id="profile-signout">Sign out</button>
+    </div>
+  </section>
+
+  <!-- ===== Progress tab — students ===== -->
+  <section class="profile-tab-panel" data-ptab-panel="progress">
+    <div class="stat-grid">
+      <div class="stat"><div class="stat-label">Topics practiced</div><div class="stat-num" id="prog-topics">0</div></div>
+      <div class="stat"><div class="stat-label">Lessons watched</div><div class="stat-num" id="prog-lessons">0</div></div>
+      <div class="stat"><div class="stat-label">Exercises done</div><div class="stat-num" id="prog-exercises">0</div></div>
+      <div class="stat"><div class="stat-label">Target band</div><div class="stat-num" id="prog-band">7.5</div></div>
+    </div>
+
+    <div class="progress-section">
+      <h2 style="font-size:18px;margin-bottom:16px">Skill progress</h2>
+      <div class="progress-row">
+        <div class="progress-label">Fluency</div>
+        <div class="progress-bar"><div class="progress-fill" id="prog-flu" style="width:0%"></div></div>
+        <div class="progress-pct" id="prog-flu-pct">0%</div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label">Pronunciation</div>
+        <div class="progress-bar"><div class="progress-fill" id="prog-pro" style="width:0%"></div></div>
+        <div class="progress-pct" id="prog-pro-pct">0%</div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label">Vocabulary</div>
+        <div class="progress-bar"><div class="progress-fill" id="prog-voc" style="width:0%"></div></div>
+        <div class="progress-pct" id="prog-voc-pct">0%</div>
+      </div>
+      <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" data-bump="flu">+5% Fluency</button>
+        <button class="btn btn-ghost btn-sm" data-bump="pro">+5% Pronunciation</button>
+        <button class="btn btn-ghost btn-sm" data-bump="voc">+5% Vocabulary</button>
+      </div>
+    </div>
+
+    <h2 style="font-size:18px;margin:32px 0 16px">Recent activity</h2>
+    <div class="activity-list" id="prog-activity"></div>
+  </section>
+
+  <!-- ===== Content tab — admin/teacher ===== -->
+  <section class="profile-tab-panel" data-ptab-panel="content">
+
+    <div class="teacher-banner">
+      <span class="teacher-banner-icon" aria-hidden="true">👁</span>
+      <div>
+        <strong>View-only access.</strong>
+        Browse all content here, but you can't add, edit, or delete anything.
+      </div>
+    </div>
+
+    <div class="admin-quick-actions">
+      <button class="quick-action" type="button" data-open-modal="modal-topic" data-admin-only>
+        <span class="quick-action-icon" aria-hidden="true">＋</span>
+        <span class="quick-action-label">Add Topic</span>
+        <span class="quick-action-hint">Speaking questions + answers</span>
+      </button>
+      <button class="quick-action" type="button" data-open-modal="modal-lesson" data-admin-only>
+        <span class="quick-action-icon" aria-hidden="true">＋</span>
+        <span class="quick-action-label">Add Lesson</span>
+        <span class="quick-action-hint">Timestamped shadowing</span>
+      </button>
+      <button class="quick-action" type="button" data-open-modal="modal-material" data-admin-only>
+        <span class="quick-action-icon" aria-hidden="true">＋</span>
+        <span class="quick-action-label">Upload PDF</span>
+        <span class="quick-action-hint">Study materials</span>
+      </button>
+      <button class="quick-action" type="button" data-open-modal="modal-exercise" data-admin-only>
+        <span class="quick-action-icon" aria-hidden="true">＋</span>
+        <span class="quick-action-label">Add Exercise</span>
+        <span class="quick-action-hint">Pronunciation drills</span>
+      </button>
+    </div>
+
+    <div class="content-section">
+      <div class="content-section-head">
+        <h3>Topics</h3><span class="muted-inline" id="topics-count"></span>
+      </div>
+      <div id="topics-list-msg"></div>
+      <div class="table-wrap">
+        <table id="topics-table">
+          <thead><tr><th>Title</th><th>Part</th><th>Category</th><th>Status</th><th style="text-align:right">Actions</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <div class="content-section-head">
+        <h3>Shadowing lessons</h3><span class="muted-inline" id="lessons-count"></span>
+      </div>
+      <div id="lessons-list-msg"></div>
+      <div class="table-wrap">
+        <table id="lessons-table">
+          <thead><tr><th>Title</th><th>Level</th><th>Sentences</th><th>Phrases</th><th style="text-align:right">Actions</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <div class="content-section-head">
+        <h3>Materials</h3><span class="muted-inline" id="materials-count"></span>
+      </div>
+      <div id="materials-list-msg"></div>
+      <div class="table-wrap">
+        <table id="materials-table">
+          <thead><tr><th>Title</th><th>Category</th><th>Size</th><th>Added</th><th style="text-align:right">Actions</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <div class="content-section-head">
+        <h3>Exercises</h3><span class="muted-inline" id="exercises-count"></span>
+      </div>
+      <div id="exercises-list-msg"></div>
+      <div class="table-wrap">
+        <table id="exercises-table">
+          <thead><tr><th>Title</th><th>Type</th><th>Added</th><th style="text-align:right">Actions</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ===== Students tab — admin/teacher ===== -->
+  <section class="profile-tab-panel" data-ptab-panel="students">
+    <div class="students-toolbar">
+      <input type="search" id="students-search" class="search-input"
+             placeholder="Search by name or email…" />
+      <span class="muted-inline" id="students-count"></span>
+    </div>
+    <div id="students-msg"></div>
+    <div class="table-wrap">
+      <table id="students-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Joined</th>
+            <th style="text-align:right">Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===== Stats tab — admin/teacher ===== -->
+  <section class="profile-tab-panel" data-ptab-panel="stats">
+    <div id="stats-msg"></div>
+    <div class="stats-grid" id="site-stats-grid"></div>
+
+    <div class="stats-row">
+      <div class="content-section stats-half">
+        <div class="content-section-head">
+          <h3>Most watched lessons</h3>
+        </div>
+        <div class="leader-list" id="most-watched-list">
+          <div class="muted-inline" style="padding:20px;text-align:center">—</div>
+        </div>
+      </div>
+      <div class="content-section stats-half">
+        <div class="content-section-head">
+          <h3>Most practiced topics</h3>
+        </div>
+        <div class="leader-list" id="most-practiced-list">
+          <div class="muted-inline" style="padding:20px;text-align:center">—</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ===== Modals ===== -->
+
+<!-- Topic modal -->
+<div class="modal" id="modal-topic" hidden role="dialog" aria-modal="true" aria-labelledby="modal-topic-title">
+  <div class="modal-backdrop" data-modal-close></div>
+  <div class="modal-panel">
+    <div class="modal-head">
+      <h2 id="modal-topic-title">Add topic</h2>
+      <button class="modal-close" type="button" data-modal-close aria-label="Close">×</button>
+    </div>
+    <form id="form-topic" class="modal-body">
+      <input type="hidden" id="topic-id" />
+      <div id="topic-msg"></div>
+
+      <div class="form-row"><label>Title</label><input id="topic-title" required maxlength="200" /></div>
+      <div class="form-row-inline">
+        <div class="form-row"><label>Part</label>
+          <select id="topic-part" required>
+            <option value="1">Part 1</option>
+            <option value="2">Part 2</option>
+            <option value="3">Part 3</option>
+          </select>
+        </div>
+        <div class="form-row"><label>Category</label>
+          <select id="topic-category" required>
+            <option>Technology</option><option>Environment</option><option>Society</option>
+            <option>Health</option><option>Education</option><option>Travel</option>
+            <option>Work</option><option>Culture</option><option>Sport</option><option>Media</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Questions (one per line)</label>
+        <textarea id="topic-questions" required class="text-editor"
+                  placeholder="Where is your hometown?&#10;What do you like most about it?"></textarea>
+      </div>
+      <div class="form-row">
+        <label>Band 6.5 sample answer</label>
+        <textarea id="topic-answer-65" required class="text-editor"></textarea>
+      </div>
+      <div class="form-row">
+        <label>Band 8.0 sample answer</label>
+        <textarea id="topic-answer-80" required class="text-editor"></textarea>
+      </div>
+    </form>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-ghost" data-modal-close>Cancel</button>
+      <button type="submit" form="form-topic" class="btn btn-primary" id="topic-publish">Publish</button>
+    </div>
+  </div>
+</div>
+
+<!-- Lesson modal -->
+<div class="modal" id="modal-lesson" hidden role="dialog" aria-modal="true" aria-labelledby="modal-lesson-title">
+  <div class="modal-backdrop" data-modal-close></div>
+  <div class="modal-panel">
+    <div class="modal-head">
+      <h2 id="modal-lesson-title">Add shadowing lesson</h2>
+      <button class="modal-close" type="button" data-modal-close aria-label="Close">×</button>
+    </div>
+    <form id="form-lesson" class="modal-body">
+      <input type="hidden" id="lesson-id" />
+      <input type="hidden" id="lesson-video-source" value="youtube" />
+      <input type="hidden" id="lesson-video-url" value="" />
+      <input type="hidden" id="lesson-cloudinary-public-id" value="" />
+      <input type="hidden" id="lesson-thumbnail-url" value="" />
+      <input type="hidden" id="lesson-duration-seconds" value="" />
+      <div id="lesson-msg"></div>
+
+      <div class="form-row"><label>Title</label><input id="lesson-title-input" required maxlength="200" /></div>
+
+      <div class="form-row">
+        <label>Video source</label>
+        <div class="video-source-tabs" role="tablist">
+          <button type="button" class="video-source-tab" data-source="cloudinary" role="tab">📤 Upload video</button>
+          <button type="button" class="video-source-tab active" data-source="youtube" role="tab">🔗 YouTube URL</button>
+        </div>
+      </div>
+
+      <div class="video-source-panel active" data-source-panel="youtube">
+        <div class="form-row"><label>YouTube URL</label>
+          <input id="lesson-yt-url" placeholder="https://youtube.com/watch?v=…" />
+        </div>
+      </div>
+
+      <div class="video-source-panel" data-source-panel="cloudinary">
+        <div class="form-row">
+          <label>Video file (mp4 / mov / webm — up to 500 MB)</label>
+          <div class="video-drop-zone" id="video-drop-zone">
+            <div class="video-drop-empty" id="video-drop-empty">
+              <div class="video-drop-icon" aria-hidden="true">📤</div>
+              <div>Drag and drop a video, or <span class="link-like">click to choose</span></div>
+            </div>
+            <div class="video-drop-uploading" id="video-drop-uploading" hidden>
+              <div class="upload-progress-bar"><div class="upload-progress-fill" id="upload-fill"></div></div>
+              <div class="upload-progress-text" id="upload-status">Uploading…</div>
+              <button type="button" class="btn btn-ghost btn-sm" id="upload-cancel" style="margin-top:8px">Cancel</button>
+            </div>
+            <div class="video-drop-done" id="video-drop-done" hidden>
+              <img id="video-thumb-preview" alt="" />
+              <div class="upload-done-meta">
+                <div class="upload-done-name" id="upload-done-name"></div>
+                <div class="upload-done-info" id="upload-done-info"></div>
+                <button type="button" class="btn btn-ghost btn-sm" id="upload-replace">Replace</button>
+              </div>
+            </div>
+            <input type="file" id="video-file-input" accept="video/mp4,video/quicktime,video/webm,video/*" hidden />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row"><label>Level</label>
+        <select id="lesson-level-input" required>
+          <option value="beginner">Beginner</option>
+          <option value="intermediate">Intermediate</option>
+          <option value="advanced">Advanced</option>
+        </select>
+      </div>
+
+      <div class="form-row-inline">
+        <div class="form-row"><label>Duration</label><input id="lesson-duration" placeholder="e.g. 4:32" /></div>
+        <div class="form-row"><label>Topic tag</label><input id="lesson-topic" placeholder="e.g. Travel" /></div>
+      </div>
+
+      <div class="form-row">
+        <label>Transcript — one sentence per line, prefix each with <code>[m:ss]</code></label>
+        <textarea id="lesson-transcript" required class="text-editor" style="min-height:180px"
+          placeholder="[0:00] First sentence.&#10;[0:05] Second sentence."></textarea>
+      </div>
+      <div class="form-row">
+        <label>Key phrases — one per line: <code>m:ss | phrase | meaning | example</code></label>
+        <textarea id="lesson-phrases-text" class="text-editor"
+          placeholder="0:05 | nice phrase | what it means | example sentence"></textarea>
+      </div>
+      <input type="hidden" id="lesson-key-phrases" />
+    </form>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-ghost" data-modal-close>Cancel</button>
+      <button type="submit" form="form-lesson" class="btn btn-primary" id="lesson-publish">Publish</button>
+    </div>
+  </div>
+</div>
+
+<!-- Material modal -->
+<div class="modal" id="modal-material" hidden role="dialog" aria-modal="true" aria-labelledby="modal-material-title">
+  <div class="modal-backdrop" data-modal-close></div>
+  <div class="modal-panel">
+    <div class="modal-head">
+      <h2 id="modal-material-title">Upload material</h2>
+      <button class="modal-close" type="button" data-modal-close aria-label="Close">×</button>
+    </div>
+    <form id="form-material" class="modal-body">
+      <div id="material-msg"></div>
+      <div class="form-row"><label>Title</label><input name="title" required maxlength="200" /></div>
+      <div class="form-row"><label>Category</label>
+        <select name="category" required>
+          <option>Vocabulary</option><option>Idioms</option>
+          <option>Band descriptors</option><option>Sample answers</option><option>Grammar</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>PDF file (max 20 MB)</label>
+        <div class="drop-zone" id="drop-zone">
+          Drag and drop a PDF, or click to choose
+          <input type="file" id="file-input" name="file" accept="application/pdf" style="display:none" />
+        </div>
+        <div id="file-name" style="font-size:12px;color:var(--muted);margin-top:8px"></div>
+      </div>
+    </form>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-ghost" data-modal-close>Cancel</button>
+      <button type="submit" form="form-material" class="btn btn-primary">Publish</button>
+    </div>
+  </div>
+</div>
+
+<!-- Exercise modal -->
+<div class="modal" id="modal-exercise" hidden role="dialog" aria-modal="true" aria-labelledby="modal-exercise-title">
+  <div class="modal-backdrop" data-modal-close></div>
+  <div class="modal-panel">
+    <div class="modal-head">
+      <h2 id="modal-exercise-title">Add exercise</h2>
+      <button class="modal-close" type="button" data-modal-close aria-label="Close">×</button>
+    </div>
+    <form id="form-exercise" class="modal-body">
+      <input type="hidden" id="exercise-id" />
+      <div id="exercise-msg"></div>
+      <div class="form-row"><label>Title</label><input id="exercise-title" required maxlength="200" /></div>
+      <div class="form-row"><label>Type</label>
+        <select id="exercise-type" required>
+          <option value="minimal-pair">Minimal pair</option>
+          <option value="stress-pattern">Stress pattern</option>
+          <option value="fluency-timer">Fluency timer</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Description</label>
+        <textarea id="exercise-description" class="text-editor" style="min-height:140px"
+                  placeholder="Describe how the student should approach this exercise…"></textarea>
+      </div>
+    </form>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-ghost" data-modal-close>Cancel</button>
+      <button type="submit" form="form-exercise" class="btn btn-primary" id="exercise-publish">Publish</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast stack -->
+<div class="toast-stack" id="toast-stack" aria-live="polite"></div>
+
+<script src="/js/main.js"></script>
+<script src="/js/profile.js"></script>
+<script src="/js/admin.js"></script>
+</body>
+</html>

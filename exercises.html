@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#09090b" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Speak_Age" />
+<meta name="format-detection" content="telephone=no" />
+<link rel="manifest" href="/manifest.json" />
+<link rel="apple-touch-icon" href="/icon-192.svg" />
+<link rel="icon" type="image/svg+xml" href="/icon-192.svg" />
+<title>Exercises — Speak_Age</title>
+<link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+<header class="nav">
+  <div class="container nav-inner">
+    <a href="/index.html" class="logo"><svg class="logo-mark" viewBox="0 0 512 512" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="42" stroke-linecap="round" fill="none"><circle cx="256" cy="248" r="84"/><ellipse cx="256" cy="256" rx="180" ry="58" transform="rotate(-18 256 256)"/><path d="M 340 140 Q 358 118 380 132"/><path d="M 374 118 Q 394 100 416 118"/></g></svg><span class="logo-text">Speak<span class="underscore">_</span>Age</span></a>
+    <ul class="nav-links">
+      <li><a href="/topics.html">Topics</a></li>
+      <li><a href="/shadowing.html">Shadowing</a></li>
+      <li><a href="/exercises.html">Exercises</a></li>
+      <li><a href="/materials.html">Materials</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="/dashboard.html" class="btn btn-ghost">Dashboard</a>
+    </div>
+    <button class="menu-toggle"><span></span></button>
+  </div>
+</header>
+
+<section class="page-head">
+  <div class="container">
+    <h1>Exercises</h1>
+    <p>Targeted drills for pronunciation, stress, fluency and natural delivery.</p>
+  </div>
+</section>
+
+<div class="container" style="padding:32px 0 80px">
+
+  <!-- 1. Pronunciation -->
+  <section class="exercise-section">
+    <h2>1. Pronunciation</h2>
+    <p class="desc">Minimal pair drills — say each pair aloud, exaggerating the contrast.</p>
+    <div class="pair-grid">
+      <div class="pair"><div class="pair-sound">/ɪ/ vs /iː/</div><div class="pair-words">ship / sheep · bit / beat · live / leave</div></div>
+      <div class="pair"><div class="pair-sound">/æ/ vs /e/</div><div class="pair-words">bat / bet · sat / set · man / men</div></div>
+      <div class="pair"><div class="pair-sound">/θ/ vs /s/</div><div class="pair-words">think / sink · thumb / sum · path / pass</div></div>
+      <div class="pair"><div class="pair-sound">/ð/ vs /d/</div><div class="pair-words">they / day · breathe / breed · those / doze</div></div>
+      <div class="pair"><div class="pair-sound">/v/ vs /w/</div><div class="pair-words">vine / wine · vest / west · vet / wet</div></div>
+      <div class="pair"><div class="pair-sound">/ʃ/ vs /tʃ/</div><div class="pair-words">ship / chip · share / chair · wash / watch</div></div>
+      <div class="pair"><div class="pair-sound">/ɒ/ vs /ɔː/</div><div class="pair-words">cot / caught · don / dawn · pot / port</div></div>
+      <div class="pair"><div class="pair-sound">/ʌ/ vs /ɑː/</div><div class="pair-words">cup / carp · hut / heart · cut / cart</div></div>
+    </div>
+  </section>
+
+  <!-- 2. Word stress -->
+  <section class="exercise-section">
+    <h2>2. Word stress</h2>
+    <p class="desc">The stressed syllable is in <span style="color:var(--accent)">purple</span>. Tap your hand on the table to feel the rhythm.</p>
+    <div class="stress-list" id="stress-list"></div>
+  </section>
+
+  <!-- 3. Fluency timer -->
+  <section class="exercise-section">
+    <h2>3. Fluency challenge</h2>
+    <p class="desc">Speak continuously for 2 minutes on any topic. No long pauses, no hesitation fillers.</p>
+    <div class="timer-wrap">
+      <div class="timer-display" id="timer">2:00</div>
+      <div class="timer-controls">
+        <button class="btn btn-primary" id="t-start">Start</button>
+        <button class="btn btn-ghost" id="t-pause">Pause</button>
+        <button class="btn btn-ghost" id="t-reset">Reset</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Filler words -->
+  <section class="exercise-section">
+    <h2>4. Filler words</h2>
+    <p class="desc">These crutch words damage your fluency score. Replace them with the natural alternative or a brief pause.</p>
+    <div class="filler-grid">
+      <div class="filler-head">Avoid</div>
+      <div class="filler-head">Try instead</div>
+      <div class="bad">um, uh, er</div><div class="good">a brief pause</div>
+      <div class="bad">like (overused)</div><div class="good">for example, such as</div>
+      <div class="bad">you know</div><div class="good">in other words</div>
+      <div class="bad">basically</div><div class="good">essentially, in short</div>
+      <div class="bad">stuff / things</div><div class="good">issues, factors, aspects</div>
+      <div class="bad">very + adjective</div><div class="good">stronger adjective (huge, vital, crucial)</div>
+      <div class="bad">I think (repeated)</div><div class="good">in my view, from my perspective</div>
+      <div class="bad">good / bad</div><div class="good">beneficial / detrimental</div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <div class="container footer-inner">
+    <a href="/index.html" class="logo"><svg class="logo-mark" viewBox="0 0 512 512" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="42" stroke-linecap="round" fill="none"><circle cx="256" cy="248" r="84"/><ellipse cx="256" cy="256" rx="180" ry="58" transform="rotate(-18 256 256)"/><path d="M 340 140 Q 358 118 380 132"/><path d="M 374 118 Q 394 100 416 118"/></g></svg><span class="logo-text">Speak<span class="underscore">_</span>Age</span></a>
+    <ul class="footer-links"><li><a href="#">Privacy</a></li><li><a href="#">Terms</a></li><li><a href="#">Contact</a></li></ul>
+  </div>
+</footer>
+
+<script src="/js/main.js"></script>
+<script src="/js/exercises.js"></script>
+</body>
+</html>

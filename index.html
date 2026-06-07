@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#09090b" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Speak_Age" />
+<meta name="format-detection" content="telephone=no" />
+<link rel="manifest" href="/manifest.json" />
+<link rel="apple-touch-icon" href="/icon-192.svg" />
+<link rel="icon" type="image/svg+xml" href="/icon-192.svg" />
+<title>Speak_Age — IELTS speaking, mastered.</title>
+<meta name="description" content="Premium IELTS speaking practice for Band 6.5 to 8.0 — topics, shadowing lessons, exercises, and study materials." />
+<link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+<!-- Navbar -->
+<header class="nav">
+  <div class="container nav-inner">
+    <a href="/index.html" class="logo"><svg class="logo-mark" viewBox="0 0 512 512" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="42" stroke-linecap="round" fill="none"><circle cx="256" cy="248" r="84"/><ellipse cx="256" cy="256" rx="180" ry="58" transform="rotate(-18 256 256)"/><path d="M 340 140 Q 358 118 380 132"/><path d="M 374 118 Q 394 100 416 118"/></g></svg><span class="logo-text">Speak<span class="underscore">_</span>Age</span></a>
+    <ul class="nav-links">
+      <li><a href="/topics.html">Topics</a></li>
+      <li><a href="/shadowing.html">Shadowing</a></li>
+      <li><a href="/exercises.html">Exercises</a></li>
+      <li><a href="/materials.html">Materials</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="/login.html" class="btn btn-ghost">Sign in</a>
+      <a href="/register.html" class="btn btn-primary">Get started</a>
+    </div>
+    <button class="menu-toggle" aria-label="Toggle menu"><span></span></button>
+  </div>
+</header>
+
+<!-- Hero -->
+<section class="hero">
+  <canvas id="space-canvas" aria-hidden="true"></canvas>
+  <div class="container hero-inner">
+    <div class="eyebrow"><span class="eyebrow-dot"></span> Built for Band 6.5 → 8.0</div>
+    <h1>Speak with confidence.<br /><span class="accent">Score with precision.</span></h1>
+    <p class="hero-sub">A premium IELTS speaking platform with examiner-grade topics, shadowing lessons, and pronunciation drills — designed for serious learners.</p>
+    <div class="hero-ctas">
+      <a href="/register.html" class="btn btn-primary btn-lg">Start practicing</a>
+      <a href="/topics.html" class="btn btn-ghost btn-lg">Browse topics</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="hero-stat-num">248</div><div class="hero-stat-label">Speaking questions</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">40+</div><div class="hero-stat-label">Shadowing lessons</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">Band 8</div><div class="hero-stat-label">Average improvement</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section>
+  <div class="container">
+    <div class="section-head">
+      <h2>Everything you need to speak fluently.</h2>
+      <p>Four pillars of speaking mastery, distilled into one focused workspace.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature">
+        <div class="feature-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/></svg>
+        </div>
+        <h3>Examiner topics</h3>
+        <p>Parts 1, 2 and 3 — modelled on the real exam with two band-graded answers.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </div>
+        <h3>Shadowing drills</h3>
+        <p>Mimic native speakers line-by-line — with transcripts and highlighted phrases.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 1v22M5 6l14 12M5 18 19 6"/></svg>
+        </div>
+        <h3>Sound work</h3>
+        <p>Minimal-pair drills, stress patterns and timed fluency challenges.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h12l4 4v12H4z"/><path d="M16 4v4h4"/></svg>
+        </div>
+        <h3>Study library</h3>
+        <p>Vocabulary, idioms, band descriptors — curated by IELTS tutors.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How it works -->
+<section style="padding-top:0">
+  <div class="container">
+    <div class="section-head">
+      <h2>How it works.</h2>
+      <p>A clear path from your current band to your target.</p>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="step-num">01</div><h3>Choose a topic</h3><p>Pick from 248 examiner questions across all three parts.</p></div>
+      <div class="step"><div class="step-num">02</div><h3>Study answers</h3><p>Compare Band 6.5 and Band 8.0 model answers side by side.</p></div>
+      <div class="step"><div class="step-num">03</div><h3>Shadow & drill</h3><p>Watch lessons, mirror phrasing, polish pronunciation.</p></div>
+      <div class="step"><div class="step-num">04</div><h3>Time yourself</h3><p>Run a 2-minute Part 2 simulation. Track progress over time.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials -->
+<section style="padding-top:0">
+  <div class="container">
+    <div class="section-head">
+      <h2>From real Speak_Age students.</h2>
+      <p>Results from learners across Uzbekistan and beyond.</p>
+    </div>
+    <div class="testimonials">
+      <div class="t-card">
+        <div class="t-quote">“I moved from 6.0 to 7.5 in three months. The shadowing lessons changed how I hear my own English.”</div>
+        <div class="t-author"><div class="t-avatar">DR</div><div><div class="t-name">Dilnoza Rakhimova</div><div class="t-band">Achieved Band 7.5</div></div></div>
+      </div>
+      <div class="t-card">
+        <div class="t-quote">“The minimal pair drills fixed my /θ/ vs /s/ once and for all. My fluency score jumped two bands.”</div>
+        <div class="t-author"><div class="t-avatar">AY</div><div><div class="t-name">Akmal Yusupov</div><div class="t-band">Achieved Band 8.0</div></div></div>
+      </div>
+      <div class="t-card">
+        <div class="t-quote">“Comparing 6.5 and 8.0 answers showed me exactly what was missing. Now I sound like a different speaker.”</div>
+        <div class="t-author"><div class="t-avatar">MK</div><div><div class="t-name">Madina Karimova</div><div class="t-band">Achieved Band 7.0</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Email CTA -->
+<section style="padding-top:0">
+  <div class="container">
+    <div class="email-cta">
+      <h2>Start your Band 8 journey.</h2>
+      <p>Join thousands of IELTS learners practicing daily. Free to start.</p>
+      <form class="email-form" onsubmit="event.preventDefault(); location.href='/register.html?email='+encodeURIComponent(this.email.value)">
+        <input type="email" name="email" required placeholder="you@example.com" />
+        <button type="submit" class="btn btn-primary">Get access</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="container footer-inner">
+    <a href="/index.html" class="logo"><svg class="logo-mark" viewBox="0 0 512 512" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="42" stroke-linecap="round" fill="none"><circle cx="256" cy="248" r="84"/><ellipse cx="256" cy="256" rx="180" ry="58" transform="rotate(-18 256 256)"/><path d="M 340 140 Q 358 118 380 132"/><path d="M 374 118 Q 394 100 416 118"/></g></svg><span class="logo-text">Speak<span class="underscore">_</span>Age</span></a>
+    <ul class="footer-links">
+      <li><a href="#">Privacy</a></li>
+      <li><a href="#">Terms</a></li>
+      <li><a href="#">Contact</a></li>
+    </ul>
+  </div>
+</footer>
+
+<script src="/js/main.js"></script>
+</body>
+</html>

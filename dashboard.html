@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#09090b" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Speak_Age" />
+<meta name="format-detection" content="telephone=no" />
+<link rel="manifest" href="/manifest.json" />
+<link rel="apple-touch-icon" href="/icon-192.svg" />
+<link rel="icon" type="image/svg+xml" href="/icon-192.svg" />
+<title>Dashboard — Speak_Age</title>
+<link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+<header class="nav">
+  <div class="container nav-inner">
+    <a href="/index.html" class="logo"><svg class="logo-mark" viewBox="0 0 512 512" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="42" stroke-linecap="round" fill="none"><circle cx="256" cy="248" r="84"/><ellipse cx="256" cy="256" rx="180" ry="58" transform="rotate(-18 256 256)"/><path d="M 340 140 Q 358 118 380 132"/><path d="M 374 118 Q 394 100 416 118"/></g></svg><span class="logo-text">Speak<span class="underscore">_</span>Age</span></a>
+    <ul class="nav-links">
+      <li><a href="/topics.html">Topics</a></li>
+      <li><a href="/shadowing.html">Shadowing</a></li>
+      <li><a href="/exercises.html">Exercises</a></li>
+      <li><a href="/materials.html">Materials</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="btn btn-ghost" id="logout">Sign out</button>
+    </div>
+    <button class="menu-toggle"><span></span></button>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="welcome">
+    <div class="avatar-circle" id="avatar">??</div>
+    <div>
+      <h1 id="greeting">Welcome back</h1>
+      <p id="subgreet">Keep your streak going.</p>
+    </div>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat">
+      <div class="stat-label">Topics practiced</div>
+      <div class="stat-num" id="s-topics">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Lessons watched</div>
+      <div class="stat-num" id="s-lessons">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Exercises done</div>
+      <div class="stat-num" id="s-exercises">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Target band</div>
+      <div class="stat-num" id="s-band">7.5</div>
+    </div>
+  </div>
+
+  <div class="progress-section">
+    <h2 style="font-size:18px;margin-bottom:16px">Skill progress</h2>
+    <div class="progress-row">
+      <div class="progress-label">Fluency</div>
+      <div class="progress-bar"><div class="progress-fill" id="p-flu" style="width:0%"></div></div>
+      <div class="progress-pct" id="pct-flu">0%</div>
+    </div>
+    <div class="progress-row">
+      <div class="progress-label">Pronunciation</div>
+      <div class="progress-bar"><div class="progress-fill" id="p-pro" style="width:0%"></div></div>
+      <div class="progress-pct" id="pct-pro">0%</div>
+    </div>
+    <div class="progress-row">
+      <div class="progress-label">Vocabulary</div>
+      <div class="progress-bar"><div class="progress-fill" id="p-voc" style="width:0%"></div></div>
+      <div class="progress-pct" id="pct-voc">0%</div>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-ghost btn-sm" data-bump="flu">+5% Fluency</button>
+      <button class="btn btn-ghost btn-sm" data-bump="pro">+5% Pronunciation</button>
+      <button class="btn btn-ghost btn-sm" data-bump="voc">+5% Vocabulary</button>
+    </div>
+  </div>
+
+  <h2 style="font-size:18px;margin:32px 0 16px">Recent activity</h2>
+  <div class="activity-list" id="activity-list"></div>
+
+  <div style="height:80px"></div>
+</div>
+
+<script src="/js/main.js"></script>
+<script>
+(async function () {
+  const user = await window.requireAuth();
+  if (!user) return;
+
+  document.getElementById('avatar').textContent = window.initials(user.name || user.email);
+  document.getElementById('greeting').textContent = `Welcome back, ${user.name || user.email.split('@')[0]}`;
+
+  // Progress is stored in localStorage (per spec) — UI mirror only, not sensitive.
+  const KEY = `speak_age_progress_${user.id}`;
+  const defaults = { flu: 35, pro: 50, voc: 42, topics: 12, lessons: 8, exercises: 5, band: '7.5' };
+  let p = JSON.parse(localStorage.getItem(KEY) || 'null') || defaults;
+  function save() { localStorage.setItem(KEY, JSON.stringify(p)); }
+
+  function paint() {
+    document.getElementById('s-topics').textContent = p.topics;
+    document.getElementById('s-lessons').textContent = p.lessons;
+    document.getElementById('s-exercises').textContent = p.exercises;
+    document.getElementById('s-band').textContent = p.band;
+    for (const k of ['flu','pro','voc']) {
+      const pct = Math.min(100, Math.max(0, p[k]));
+      document.getElementById(`p-${k}`).style.width = pct + '%';
+      document.getElementById(`pct-${k}`).textContent = pct + '%';
+    }
+  }
+  paint();
+
+  document.querySelectorAll('[data-bump]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const k = btn.getAttribute('data-bump');
+      p[k] = Math.min(100, (p[k] || 0) + 5);
+      save(); paint();
+    });
+  });
+
+  // Activity feed — fetched from API if available, else fallback to local
+  const list = document.getElementById('activity-list');
+  function esc(s) {
+    return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+  }
+  function timeAgo(iso) {
+    if (!iso) return '';
+    const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+    if (s < 60) return 'just now';
+    if (s < 3600) return Math.floor(s/60) + 'm ago';
+    if (s < 86400) return Math.floor(s/3600) + 'h ago';
+    return Math.floor(s/86400) + 'd ago';
+  }
+  const { ok, data } = await window.api('/api/progress/activity');
+  const items = ok && data.activity && data.activity.length ? data.activity : [
+    { action: 'topic_studied', detail: 'Reviewed: Describe a memorable journey', created_at: new Date(Date.now()-3600000).toISOString() },
+    { action: 'lesson_watched', detail: 'Shadowing: A day in Cambridge', created_at: new Date(Date.now()-86400000).toISOString() },
+    { action: 'fluency_completed', detail: '2-minute fluency challenge', created_at: new Date(Date.now()-172800000).toISOString() }
+  ];
+  list.innerHTML = items.map(a => `
+    <div class="activity-item">
+      <div class="activity-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="activity-text">${esc(a.detail)}</div>
+      <div class="activity-time">${timeAgo(a.created_at)}</div>
+    </div>
+  `).join('');
+
+  const logoutBtn = document.getElementById('logout');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
+      await window.api('/api/auth/logout', { method: 'POST' });
+      location.href = '/index.html';
+    });
+  }
+})();
+</script>
+</body>
+</html>
