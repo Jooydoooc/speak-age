@@ -43,6 +43,12 @@
   let autoPauseOn = false;
   let shadowOn = false;
   let pollTimer = null;
+  // Suppress auto-scroll while the student is manually scrolling the
+  // transcript. Reset 2s after the last manual scroll event.
+  let userScrolling = false;
+  let userScrollTimer = null;
+  let programmaticScroll = false;
+  let programmaticScrollTimer = null;
 
   const $ = (id) => document.getElementById(id);
   const transcriptListEl = $('transcript-list');
@@ -216,12 +222,31 @@
     const el = transcriptListEl.querySelector(`.t-sentence[data-idx="${idx}"]`);
     if (!el) return;
     el.classList.add('current');
-    // Always scroll active sentence to the vertical center of the transcript panel.
+    // Center the active sentence — but defer to the student if they're
+    // actively scrolling the transcript (paused for 2s after their last
+    // manual scroll, see the userScrolling listener below).
+    if (userScrolling) return;
     const panel = transcriptListEl;
     const panelRect = panel.getBoundingClientRect();
     const elRect = el.getBoundingClientRect();
     const targetTop = panel.scrollTop + (elRect.top - panelRect.top) - (panel.clientHeight / 2) + (el.clientHeight / 2);
+    // Flag our own scroll so it doesn't get mis-detected as a manual scroll.
+    programmaticScroll = true;
+    clearTimeout(programmaticScrollTimer);
+    programmaticScrollTimer = setTimeout(() => { programmaticScroll = false; }, 600);
     panel.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
+  }
+
+  // User-scroll detection on the transcript panel. While true, auto-scroll
+  // is suppressed so the student can browse upcoming sentences without the
+  // player snapping their view back to the current one.
+  if (transcriptListEl) {
+    transcriptListEl.addEventListener('scroll', () => {
+      if (programmaticScroll) return; // ignore our own auto-scrolls
+      userScrolling = true;
+      clearTimeout(userScrollTimer);
+      userScrollTimer = setTimeout(() => { userScrolling = false; }, 2000);
+    }, { passive: true });
   }
 
   // --- Progress recording ------------------------------------------------
@@ -408,7 +433,7 @@
   // shim that exposes the same surface area as YT.Player so the rest of the
   // file (tick, seekTo, single-play, speed control, repeat, etc.) keeps
   // working without further branching.
-  function createCloudinaryPlayer(elementId, { videoUrl, poster, onReady, onStateChange }) {
+  function createCloudinaryPlayer(elementId, { videoUrl, poster, onReady, onStateChange, onTimeUpdate }) {
     const slot = document.getElementById(elementId);
     if (!slot) return null;
     const video = document.createElement('video');
@@ -440,6 +465,11 @@
     video.addEventListener('play', fire);
     video.addEventListener('pause', fire);
     video.addEventListener('ended', fire);
+    // Native HTML5 timeupdate fires ~4 Hz during playback — much cheaper
+    // than relying solely on polling and gives instant sync on seek.
+    if (typeof onTimeUpdate === 'function') {
+      video.addEventListener('timeupdate', () => onTimeUpdate(video.currentTime));
+    }
 
     return {
       seekTo(seconds /* , allowSeekAhead */) {
@@ -461,12 +491,16 @@
       player = createCloudinaryPlayer('yt-player', {
         videoUrl: lesson.video_url,
         poster:   lesson.thumbnail_url,
-        onReady:  () => { playerReady = true; startPolling(); },
+        onReady:  () => { playerReady = true; },
         onStateChange: (e) => {
-          if (e.data === 1) pauseGateIdx = -1;
+          if (e.data === 1) { pauseGateIdx = -1; startPolling(); }                    // PLAYING
+          if (e.data === 2 || e.data === 0) { tick(); stopPolling(); }                 // PAUSED / ENDED
           if (e.data === 0 && repeatAllOn) { player.seekTo(0, true); player.playVideo(); }
           updatePlayButtonIcons();
-        }
+        },
+        // HTML5 video fires `timeupdate` ~4 Hz natively — pipe it through tick()
+        // for snappier sync alongside the 100 ms polling loop.
+        onTimeUpdate: () => tick()
       });
       return;
     }
@@ -482,9 +516,11 @@
       videoId,
       playerVars: { modestbranding: 1, rel: 0, playsinline: 1, controls: 1, iv_load_policy: 3 },
       events: {
-        onReady: () => { playerReady = true; startPolling(); },
+        onReady: () => { playerReady = true; },
         onStateChange: (e) => {
-          if (e.data === 1) pauseGateIdx = -1;
+          // YT.PlayerState: -1 unstarted · 0 ENDED · 1 PLAYING · 2 PAUSED · 3 buffering · 5 cued
+          if (e.data === 1) { pauseGateIdx = -1; startPolling(); }                      // PLAYING
+          if (e.data === 2 || e.data === 0) { tick(); stopPolling(); }                  // PAUSED / ENDED
           if (e.data === 0 && repeatAllOn) { player.seekTo(0, true); player.playVideo(); }
           updatePlayButtonIcons();
         }
@@ -494,7 +530,11 @@
 
   function startPolling() {
     if (pollTimer) return;
-    pollTimer = setInterval(tick, 250);
+    pollTimer = setInterval(tick, 100); // poll every 100 ms (was 250 ms) for snappier sync
+    tick(); // immediate first paint so the highlight doesn't wait a frame
+  }
+  function stopPolling() {
+    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
   }
   function tick() {
     if (!playerReady || !player.getCurrentTime) return;
@@ -518,7 +558,11 @@
       return;
     }
 
-    const idx = findSentenceIdxAt(t);
+    // Fire highlight 0.15s early to compensate for browser/iframe render
+    // delay so the active sentence flips slightly BEFORE the speaker reaches
+    // it, instead of trailing behind. findSentenceIdxAt already adds 0.05s
+    // tolerance — bumping the input by another 0.10s gives the full 0.15s.
+    const idx = findSentenceIdxAt(t + 0.10);
 
     if (repeatSentenceOn && lastSentenceIdx >= 0 && idx !== lastSentenceIdx) {
       const cur = sentences[lastSentenceIdx];
