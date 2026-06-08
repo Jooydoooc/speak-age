@@ -66,10 +66,8 @@
     window.toast('Profile saved');
   });
 
-  $('profile-signout').addEventListener('click', async () => {
-    try { await window.api('/api/auth/logout', { method: 'POST' }); } catch (_) {}
-    location.href = '/login.html';
-  });
+  // Sign-out lives only in the navbar avatar dropdown now — keeping a second
+  // button on this page made it too easy to click by accident.
 
   // --- Tab visibility by role -------------------------------------------
   document.querySelectorAll('.profile-tab').forEach(t => {

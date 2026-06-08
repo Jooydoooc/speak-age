@@ -2200,22 +2200,6 @@ body.modal-open { overflow: hidden; }
 .profile-stat-row .label { color: var(--muted); }
 .profile-stat-row .value { font-weight: 600; font-variant-numeric: tabular-nums; }
 
-.btn-signout {
-  margin-top: 28px;
-  width: 100%;
-  min-height: 44px;
-  padding: 10px 18px;
-  border-radius: 8px;
-  background: rgba(248,113,113,0.08);
-  color: #f87171;
-  border: 1px solid rgba(248,113,113,0.4);
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-}
-.btn-signout:hover { background: rgba(248,113,113,0.18); color: #fff; }
-
 @media (max-width: 768px) {
   .profile-container { padding: 24px 0 80px; }
   .profile-card { padding: 28px 20px; border-radius: 12px; margin: 0 16px; }
