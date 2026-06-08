@@ -372,15 +372,45 @@
 
       <div class="form-row"><label>Level</label>
         <select id="lesson-level-input" required>
-          <option value="beginner">Beginner</option>
-          <option value="intermediate">Intermediate</option>
-          <option value="advanced">Advanced</option>
+          <option value="Beginner">Beginner</option>
+          <option value="Elementary">Elementary</option>
+          <option value="Pre-IELTS">Pre-IELTS</option>
+          <option value="Introduction">Introduction</option>
+          <option value="Graduation">Graduation</option>
         </select>
       </div>
 
       <div class="form-row-inline">
         <div class="form-row"><label>Duration</label><input id="lesson-duration" placeholder="e.g. 4:32" /></div>
         <div class="form-row"><label>Topic tag</label><input id="lesson-topic" placeholder="e.g. Travel" /></div>
+      </div>
+
+      <div class="form-row">
+        <label>Transcript offset (seconds)</label>
+        <input id="lesson-offset-seconds" type="number" min="-300" max="300" step="0.1" value="0" />
+        <span class="form-hint">
+          If the transcript highlights too early, enter how many seconds to delay it.
+          Example: if the speaker starts at 0:25 but the transcript starts at 0:01, enter <code>24</code>.
+        </span>
+        <div class="sync-helper">
+          <button type="button" class="btn btn-ghost btn-sm" id="lesson-sync-toggle">🎯 Use video to detect offset</button>
+          <div class="sync-preview" id="lesson-sync-preview" hidden>
+            <div class="sync-preview-player">
+              <div id="lesson-sync-player"></div>
+            </div>
+            <div class="sync-preview-controls">
+              <div class="sync-preview-meta">
+                Player time: <strong id="lesson-sync-time">0.0s</strong>
+                <span class="muted-inline" id="lesson-sync-first-ts">first transcript ts: —</span>
+              </div>
+              <button type="button" class="btn btn-primary btn-sm" id="lesson-sync-mark">Mark speech start</button>
+              <div class="form-hint">
+                Play the video, then click <strong>Mark speech start</strong> the moment you first hear the speaker.
+                The offset above will auto-fill.
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="form-row">

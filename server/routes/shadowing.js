@@ -38,7 +38,8 @@ router.get('/:id', requireAuth, async (req, res) => {
 
     const lessonRows = await sql`
       SELECT id, title, youtube_url, level, duration, topic, transcript, key_phrases, phrases,
-             video_source, video_url, cloudinary_public_id, thumbnail_url, duration_seconds
+             video_source, video_url, cloudinary_public_id, thumbnail_url, duration_seconds,
+             offset_seconds
       FROM shadowing_lessons WHERE id = ${id}
     `;
     if (lessonRows.length === 0) return res.status(404).json({ error: 'Not found' });

@@ -275,12 +275,21 @@ function validateLessonBody(body) {
   if (!b.title || !b.level || !b.transcript) {
     return 'Title, level and transcript are required';
   }
-  if (!['beginner', 'intermediate', 'advanced'].includes(b.level)) return 'Invalid level';
+  if (!['Beginner', 'Elementary', 'Pre-IELTS', 'Introduction', 'Graduation'].includes(b.level)) return 'Invalid level';
   const source = b.video_source || 'youtube';
   if (source === 'youtube' && !b.youtube_url) return 'YouTube URL is required';
   if (source === 'cloudinary' && !b.video_url) return 'Upload a video before saving';
   if (source !== 'youtube' && source !== 'cloudinary') return 'Invalid video_source';
   return null;
+}
+
+// Transcript offset is a positive (usually) float in seconds. We clamp to a
+// generous ±5 min window so an accidental keystroke can't push playback far
+// into invalid territory.
+function sanitiseOffset(input) {
+  const n = Number(input);
+  if (!Number.isFinite(n)) return 0;
+  return Math.max(-300, Math.min(300, n));
 }
 
 // Coerce a `phrases` payload into a clean array of {phrase, meaning, example, ts_seconds}.
@@ -308,7 +317,7 @@ router.get('/shadowing', staffRead, async (_req, res) => {
       SELECT l.id, l.title, l.youtube_url, l.level, l.duration, l.topic,
              l.transcript, l.key_phrases, l.phrases, l.created_at,
              l.video_source, l.video_url, l.cloudinary_public_id,
-             l.thumbnail_url, l.duration_seconds,
+             l.thumbnail_url, l.duration_seconds, l.offset_seconds,
              (SELECT COUNT(*)::int FROM sentences s WHERE s.lesson_id = l.id) AS sentence_count
       FROM shadowing_lessons l ORDER BY l.created_at DESC
     `;
@@ -371,12 +380,13 @@ router.post('/shadowing', adminOnly, async (req, res) => {
     const b = req.body;
     const phrasesJson = normalisePhrases(b.phrases);
     const source = b.video_source || 'youtube';
+    const offsetSeconds = sanitiseOffset(b.offset_seconds);
 
     const rows = await sql`
       INSERT INTO shadowing_lessons (
         title, youtube_url, level, duration, topic, transcript, key_phrases,
         phrases, video_source, video_url, cloudinary_public_id, thumbnail_url,
-        duration_seconds, created_by
+        duration_seconds, offset_seconds, created_by
       )
       VALUES (
         ${b.title}, ${b.youtube_url || null}, ${b.level}, ${b.duration || ''},
@@ -384,7 +394,7 @@ router.post('/shadowing', adminOnly, async (req, res) => {
         ${JSON.stringify(phrasesJson)}::jsonb,
         ${source}, ${b.video_url || null}, ${b.cloudinary_public_id || null},
         ${b.thumbnail_url || null}, ${b.duration_seconds || null},
-        ${req.user.id}
+        ${offsetSeconds}, ${req.user.id}
       )
       RETURNING id
     `;
@@ -415,6 +425,7 @@ router.put('/shadowing/:id', adminOnly, async (req, res) => {
     const b = req.body;
     const phrasesJson = normalisePhrases(b.phrases);
     const source = b.video_source || 'youtube';
+    const offsetSeconds = sanitiseOffset(b.offset_seconds);
 
     const updated = await sql`
       UPDATE shadowing_lessons
@@ -426,7 +437,8 @@ router.put('/shadowing/:id', adminOnly, async (req, res) => {
           video_url = ${b.video_url || null},
           cloudinary_public_id = ${b.cloudinary_public_id || null},
           thumbnail_url = ${b.thumbnail_url || null},
-          duration_seconds = ${b.duration_seconds || null}
+          duration_seconds = ${b.duration_seconds || null},
+          offset_seconds = ${offsetSeconds}
       WHERE id = ${id}
       RETURNING id
     `;

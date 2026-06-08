@@ -134,6 +134,7 @@
     transcript:   document.getElementById('lesson-transcript'),
     phrasesText:  document.getElementById('lesson-phrases-text'),
     keyPhrases:   document.getElementById('lesson-key-phrases'),
+    offset:       document.getElementById('lesson-offset-seconds'),
     modalTitle:   document.getElementById('modal-lesson-title'),
     publish:      document.getElementById('lesson-publish')
   };
@@ -241,6 +242,144 @@
     document.getElementById('upload-replace')?.addEventListener('click', clearUpload);
   }
 
+  // =========================================================
+  // SYNC helper — embeds the lesson video so the admin can mark
+  // the moment speech actually starts and auto-fills offset_seconds.
+  // Supports YouTube (via IFrame API). Cloudinary uses a <video>.
+  // =========================================================
+  const syncToggleBtn = document.getElementById('lesson-sync-toggle');
+  const syncPreview   = document.getElementById('lesson-sync-preview');
+  const syncMarkBtn   = document.getElementById('lesson-sync-mark');
+  const syncTimeEl    = document.getElementById('lesson-sync-time');
+  const syncFirstEl   = document.getElementById('lesson-sync-first-ts');
+  let   syncPlayer    = null;
+  let   syncPollTimer = null;
+
+  function parseFirstTranscriptTs(text) {
+    const re = /^\[(?:(\d{1,2}):)?(\d{1,2}):(\d{2})\]/m;
+    const m  = String(text || '').match(re);
+    if (!m) return null;
+    const h = m[1] ? Number(m[1]) : 0;
+    return h * 3600 + Number(m[2]) * 60 + Number(m[3]);
+  }
+  function fmtMSS(s) {
+    const t = Math.max(0, Number(s) || 0);
+    const m = Math.floor(t / 60);
+    const ss = String(Math.floor(t % 60)).padStart(2, '0');
+    return `${m}:${ss}`;
+  }
+  function loadYouTubeAPI() {
+    return new Promise(resolve => {
+      if (window.YT && window.YT.Player) return resolve();
+      const prev = window.onYouTubeIframeAPIReady;
+      window.onYouTubeIframeAPIReady = () => { if (typeof prev === 'function') prev(); resolve(); };
+      if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
+        const tag = document.createElement('script');
+        tag.src = 'https://www.youtube.com/iframe_api';
+        document.head.appendChild(tag);
+      }
+    });
+  }
+  function ytIdFromUrl(url) {
+    if (!url) return '';
+    const m = url.match(/(?:v=|youtu\.be\/|embed\/)([\w-]{11})/);
+    return m ? m[1] : '';
+  }
+  function closeSyncPreview() {
+    if (syncPreview) syncPreview.hidden = true;
+    if (syncPollTimer) { clearInterval(syncPollTimer); syncPollTimer = null; }
+    const slot = document.getElementById('lesson-sync-player');
+    if (slot) slot.innerHTML = '';
+    syncPlayer = null;
+    if (syncTimeEl) syncTimeEl.textContent = '0.0s';
+  }
+  function refreshSyncFirstTs() {
+    const ts = parseFirstTranscriptTs(lEls.transcript.value);
+    if (syncFirstEl) {
+      syncFirstEl.textContent = ts == null
+        ? 'first transcript ts: — (paste transcript first)'
+        : `first transcript ts: ${fmtMSS(ts)}`;
+    }
+  }
+  function startSyncPolling() {
+    if (syncPollTimer) clearInterval(syncPollTimer);
+    syncPollTimer = setInterval(() => {
+      if (!syncPlayer) return;
+      const t = typeof syncPlayer.getCurrentTime === 'function' ? syncPlayer.getCurrentTime() : 0;
+      if (syncTimeEl) syncTimeEl.textContent = `${(Number(t) || 0).toFixed(1)}s`;
+    }, 200);
+  }
+  async function openSyncPreview() {
+    refreshSyncFirstTs();
+    const source = lEls.source.value;
+    const slot = document.getElementById('lesson-sync-player');
+    if (!slot) return;
+    slot.innerHTML = '';
+
+    if (source === 'youtube') {
+      const videoId = ytIdFromUrl(lEls.ytUrl.value);
+      if (!videoId) {
+        toast('Paste a YouTube URL above first', 'error');
+        return;
+      }
+      syncPreview.hidden = false;
+      await loadYouTubeAPI();
+      const div = document.createElement('div');
+      div.id = 'lesson-sync-player-mount';
+      slot.appendChild(div);
+      syncPlayer = new YT.Player('lesson-sync-player-mount', {
+        videoId,
+        playerVars: { modestbranding: 1, rel: 0, playsinline: 1, controls: 1 },
+        events: { onReady: () => startSyncPolling() }
+      });
+      return;
+    }
+
+    if (source === 'cloudinary') {
+      if (!lEls.videoUrl.value) {
+        toast('Upload the video above first', 'error');
+        return;
+      }
+      syncPreview.hidden = false;
+      const v = document.createElement('video');
+      v.src = lEls.videoUrl.value;
+      v.controls = true;
+      v.preload = 'metadata';
+      v.playsInline = true;
+      v.style.width = '100%';
+      slot.appendChild(v);
+      syncPlayer = {
+        getCurrentTime: () => v.currentTime || 0
+      };
+      startSyncPolling();
+      return;
+    }
+  }
+  if (syncToggleBtn) {
+    syncToggleBtn.addEventListener('click', () => {
+      if (syncPreview.hidden) openSyncPreview(); else closeSyncPreview();
+    });
+  }
+  if (syncMarkBtn) {
+    syncMarkBtn.addEventListener('click', () => {
+      if (!syncPlayer) return toast('Open the preview first', 'error');
+      const firstTs = parseFirstTranscriptTs(lEls.transcript.value);
+      if (firstTs == null) {
+        return toast('Paste the transcript first so we know its first timestamp', 'error');
+      }
+      const t = typeof syncPlayer.getCurrentTime === 'function' ? syncPlayer.getCurrentTime() : 0;
+      const offset = Math.max(-300, Math.min(300, Number(t) - firstTs));
+      lEls.offset.value = offset.toFixed(1);
+      toast(`Offset set to ${offset.toFixed(1)}s`);
+    });
+  }
+  // Keep the "first transcript ts" hint fresh as the admin edits the transcript.
+  if (lEls.transcript) {
+    lEls.transcript.addEventListener('input', () => {
+      if (!syncPreview.hidden) refreshSyncFirstTs();
+    });
+  }
+
   // Phrases parser
   function parsePhrasesText(text) {
     const out = [];
@@ -273,26 +412,30 @@
     lEls.id.value = '';
     lEls.title.value = '';
     lEls.ytUrl.value = '';
-    lEls.level.value = 'beginner';
+    lEls.level.value = 'Beginner';
     lEls.durTxt.value = '';
     lEls.topicTag.value = '';
     lEls.transcript.value = '';
     lEls.phrasesText.value = '';
     lEls.keyPhrases.value = '';
+    lEls.offset.value = '0';
     setVideoSource('youtube');
     clearUpload();
+    closeSyncPreview();
     [lEls.transcript, lEls.phrasesText].forEach(autoResize);
   }
   function fillLessonForm(l) {
     lEls.id.value = l.id;
     lEls.title.value = l.title || '';
     lEls.ytUrl.value = l.youtube_url || '';
-    lEls.level.value = l.level || 'beginner';
+    lEls.level.value = l.level || 'Beginner';
     lEls.durTxt.value = l.duration || '';
     lEls.topicTag.value = l.topic || '';
     lEls.transcript.value = l.transcript || '';
     lEls.phrasesText.value = phrasesToText(l.phrases);
     lEls.keyPhrases.value = l.key_phrases || '';
+    lEls.offset.value = String(Number(l.offset_seconds) || 0);
+    closeSyncPreview();
     const src = l.video_source || 'youtube';
     setVideoSource(src);
     if (src === 'cloudinary' && l.video_url) {
@@ -348,7 +491,8 @@
       cloudinary_public_id: source === 'cloudinary' ? lEls.pubId.value : null,
       thumbnail_url: source === 'cloudinary' ? lEls.thumb.value : null,
       duration_seconds: source === 'cloudinary' && lEls.duration.value
-        ? Number(lEls.duration.value) : null
+        ? Number(lEls.duration.value) : null,
+      offset_seconds: Number(lEls.offset.value) || 0
     };
     const url = id ? `/api/admin/shadowing/${id}` : '/api/admin/shadowing';
     const method = id ? 'PUT' : 'POST';

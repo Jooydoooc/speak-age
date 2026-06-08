@@ -9,6 +9,72 @@
   function esc(s) {
     return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
   }
+
+  // --- IPA dictionary ----------------------------------------------------
+  // Keys are lowercase; punctuation is stripped before lookup. Stored values
+  // are bare IPA (no surrounding pipes — those are added in the tooltip view).
+  const IPA = {
+    // People & relationships
+    colleague: 'ˈkɒliːɡ', friend: 'frend', family: 'ˈfæmɪli',
+    neighbour: 'ˈneɪbər', stranger: 'ˈstreɪndʒər',
+    // Common verbs
+    achieve: 'əˈtʃiːv', improve: 'ɪmˈpruːv', develop: 'dɪˈveləp',
+    consider: 'kənˈsɪdər', suggest: 'səˈdʒest', require: 'rɪˈkwaɪər',
+    believe: 'bɪˈliːv', receive: 'rɪˈsiːv', increase: 'ɪnˈkriːs',
+    provide: 'prəˈvaɪd', never: 'ˈnevər', always: 'ˈɔːlweɪz',
+    usually: 'ˈjuːʒuəli', often: 'ˈɒfən', sometimes: 'ˈsʌmtaɪmz',
+    // Common adjectives
+    important: 'ɪmˈpɔːtənt', different: 'ˈdɪfrənt', difficult: 'ˈdɪfɪkəlt',
+    comfortable: 'ˈkʌmftəbəl', available: 'əˈveɪləbəl', responsible: 'rɪˈspɒnsɪbəl',
+    significant: 'sɪɡˈnɪfɪkənt', appropriate: 'əˈprəʊpriɪt',
+    // IELTS topic words
+    environment: 'ɪnˈvaɪrənmənt', technology: 'tekˈnɒlədʒi',
+    education: 'ˌedʒuˈkeɪʃən', government: 'ˈɡʌvənmənt',
+    communication: 'kəˌmjuːnɪˈkeɪʃən', society: 'səˈsaɪɪti',
+    economy: 'ɪˈkɒnəmi', culture: 'ˈkʌltʃər', experience: 'ɪkˈspɪəriəns',
+    opportunity: 'ˌɒpəˈtjuːnɪti', community: 'kəˈmjuːnɪti',
+    population: 'ˌpɒpjuˈleɪʃən', pollution: 'pəˈluːʃən',
+    // Pronunciation traps
+    pronunciation: 'prəˌnʌnsiˈeɪʃən', clothes: 'kləʊðz',
+    vegetable: 'ˈvedʒtəbəl', february: 'ˈfebruəri',
+    wednesday: 'ˈwenzdeɪ', schedule: 'ˈʃedjuːl',
+    particularly: 'pəˈtɪkjʊləli', necessary: 'ˈnesəsəri',
+    especially: 'ɪˈspeʃəli', basically: 'ˈbeɪsɪkli',
+    beautiful: 'ˈbjuːtɪfəl', people: 'ˈpiːpəl',
+    world: 'wɜːld', thought: 'θɔːt', through: 'θruː',
+    enough: 'ɪˈnʌf', although: 'ɔːlˈðəʊ', throughout: 'θruːˈaʊt',
+    whole: 'həʊl', while: 'waɪl', what: 'wɒt', where: 'weər'
+  };
+  function ipaFor(word) {
+    const k = String(word || '').toLowerCase();
+    return Object.prototype.hasOwnProperty.call(IPA, k) ? IPA[k] : null;
+  }
+  // Tokenize a sentence so we can wrap word characters in <span class="word">
+  // while keeping the original punctuation/whitespace verbatim. The pattern
+  // accepts internal apostrophes and hyphens (don't, well-being), but not
+  // trailing ones (which would tag e.g. "Mary's," weirdly).
+  function wrapWordsHtml(text) {
+    const parts = String(text || '').split(/([A-Za-z][A-Za-z'\-]*)/g);
+    let out = '';
+    for (let i = 0; i < parts.length; i++) {
+      const chunk = parts[i];
+      if (!chunk) continue;
+      // Odd-indexed parts are the captured words; even-indexed are the
+      // separator chunks (whitespace + punctuation) between them.
+      if (i % 2 === 1) {
+        const ipa = ipaFor(chunk);
+        if (ipa) {
+          out += `<span class="word" data-ipa="${esc(ipa)}">${esc(chunk)}</span>`;
+        } else {
+          out += `<span class="word no-ipa">${esc(chunk)}</span>`;
+        }
+      } else {
+        out += esc(chunk);
+      }
+    }
+    return out;
+  }
+
   function ytId(url) {
     if (!url) return '';
     const m = url.match(/(?:v=|youtu\.be\/|embed\/)([\w-]{11})/);
@@ -43,6 +109,17 @@
   let autoPauseOn = false;
   let shadowOn = false;
   let pollTimer = null;
+  // Transcript-vs-video time offset, in seconds.
+  //   lessonOffset = admin-set in DB (e.g. transcript starts at 0:01 but
+  //                  speaker starts at 0:25 → offset = 24).
+  //   userOffset   = per-student fine-tune in localStorage (±10s in 0.5s steps).
+  // Relationship: playerTime = transcriptTime + lessonOffset + userOffset.
+  let lessonOffset = 0;
+  let userOffset = 0;
+  const USER_OFFSET_MIN = -10;
+  const USER_OFFSET_MAX = 10;
+  const USER_OFFSET_STEP = 0.5;
+  const userOffsetKey = () => `shadowing.lesson.${lessonId}.userOffset`;
   // Suppress auto-scroll while the student is manually scrolling the
   // transcript. Reset 2s after the last manual scroll event.
   let userScrolling = false;
@@ -73,7 +150,50 @@
     practiced = new Set((data.progress && data.progress.sentences_completed) || []);
     completed = !!(data.progress && data.progress.completed);
     rating    = (data.progress && data.progress.difficulty_rating) || null;
+    lessonOffset = Number(lesson.offset_seconds) || 0;
+    userOffset = loadUserOffset();
     return true;
+  }
+
+  // --- Time-frame helpers ------------------------------------------------
+  // The transcript stores sentence timestamps in "transcript time". The video
+  // plays in "player time". They differ by lessonOffset + userOffset. We pass
+  // transcript times into findSentenceIdxAt(), and player times into
+  // player.seekTo(), so most bugs in this area come from mixing the frames up.
+  function toPlayerTime(transcriptT) {
+    return Math.max(0, (Number(transcriptT) || 0) + lessonOffset + userOffset);
+  }
+  function toTranscriptTime(playerT) {
+    return (Number(playerT) || 0) - lessonOffset - userOffset;
+  }
+  function loadUserOffset() {
+    try {
+      const raw = localStorage.getItem(userOffsetKey());
+      const n = Number(raw);
+      if (!Number.isFinite(n)) return 0;
+      return Math.max(USER_OFFSET_MIN, Math.min(USER_OFFSET_MAX, n));
+    } catch (_) { return 0; }
+  }
+  function saveUserOffset() {
+    try { localStorage.setItem(userOffsetKey(), String(userOffset)); } catch (_) {}
+  }
+  function renderSyncWidget() {
+    const wrap = $('lesson-sync');
+    const val  = $('sync-value');
+    if (!wrap || !val) return;
+    const sign = userOffset > 0 ? '+' : '';
+    val.textContent = `${sign}${userOffset.toFixed(1)}s`;
+    wrap.classList.toggle('is-active', userOffset !== 0);
+  }
+  function adjustUserOffset(delta) {
+    const next = Math.max(USER_OFFSET_MIN, Math.min(USER_OFFSET_MAX, userOffset + delta));
+    // Avoid sticky floating-point trail (e.g. 1.5000000000000002s)
+    userOffset = Math.round(next * 10) / 10;
+    saveUserOffset();
+    renderSyncWidget();
+    // Re-evaluate highlight against the new offset right away so the student
+    // sees the change without waiting for the next 100ms poll.
+    if (playerReady) tick();
   }
 
   // --- Renders -----------------------------------------------------------
@@ -128,7 +248,7 @@
       <div class="t-sentence ${practiced.has(s.idx) ? 'practiced' : ''}" data-idx="${s.idx}" data-ts="${s.ts_seconds}">
         <button class="t-play" data-idx="${s.idx}" type="button" aria-label="Play this sentence">▶</button>
         <span class="t-ts">${fmtTs(s.ts_seconds)}</span>
-        <span class="t-text">${esc(s.text)}</span>
+        <span class="t-text">${wrapWordsHtml(s.text)}</span>
         <button class="t-slow" data-idx="${s.idx}" type="button" aria-label="Play this sentence slowly" title="Play at half speed">🐢</button>
         <span class="t-tick" title="practiced" aria-hidden="true">✓</span>
       </div>
@@ -141,7 +261,7 @@
         const ts = Number(el.dataset.ts);
         const idx = Number(el.dataset.idx);
         if (shadowOn) el.classList.add('revealed');
-        seekTo(ts, idx);
+        seekTo(toPlayerTime(ts), idx);
       });
     });
     transcriptListEl.querySelectorAll('.t-play').forEach(btn => {
@@ -185,7 +305,7 @@
         if (!p) return;
         const ts = Math.max(0, Number(p.ts_seconds) || 0);
         const idx = findSentenceIdxAt(ts);
-        seekTo(ts, idx);
+        seekTo(toPlayerTime(ts), idx);
       });
     });
   }
@@ -212,8 +332,10 @@
     if (i < 0 || i >= sentences.length) return Infinity;
     const next = sentences[i + 1];
     if (next) return next.ts_seconds;
+    // Fallback for the last sentence: player.getDuration() is in player-time, so
+    // translate to transcript-time to stay consistent with sentence timestamps.
     const dur = playerReady && player.getDuration ? player.getDuration() : 0;
-    return dur > 0 ? dur : sentences[i].ts_seconds + 30;
+    return dur > 0 ? toTranscriptTime(dur) : sentences[i].ts_seconds + 30;
   }
 
   function highlightSentence(idx) {
@@ -248,6 +370,95 @@
       userScrollTimer = setTimeout(() => { userScrolling = false; }, 2000);
     }, { passive: true });
   }
+
+  // --- Pronunciation tooltip --------------------------------------------
+  // One reusable element appended to <body> so it escapes the transcript's
+  // overflow:hidden / scroll containers. Uses fixed positioning so coords
+  // from getBoundingClientRect() can be used directly.
+  let tipEl = null;
+  let tipHideTimer = null;
+  function ensureTip() {
+    if (tipEl) return tipEl;
+    tipEl = document.createElement('div');
+    tipEl.className = 'pron-tip';
+    tipEl.hidden = true;
+    tipEl.setAttribute('role', 'tooltip');
+    document.body.appendChild(tipEl);
+    return tipEl;
+  }
+  function hideTip() {
+    if (!tipEl) return;
+    tipEl.hidden = true;
+    tipEl.classList.remove('below');
+    if (tipHideTimer) { clearTimeout(tipHideTimer); tipHideTimer = null; }
+  }
+  function showTipFor(wordEl, opts) {
+    if (!wordEl) return;
+    // Shadow mode masks the sentence — don't expose words via the tooltip.
+    const sentenceEl = wordEl.closest('.t-sentence');
+    if (sentenceEl
+        && transcriptListEl.classList.contains('shadow-mode-on')
+        && !sentenceEl.classList.contains('revealed')) {
+      return;
+    }
+    const ipa = wordEl.dataset.ipa;
+    const tip = ensureTip();
+    tip.textContent = ipa ? `| ${ipa} |` : 'No pronunciation available';
+    tip.classList.toggle('no-ipa', !ipa);
+    tip.hidden = false;
+    // Measure after content is set, then position.
+    const wordRect = wordEl.getBoundingClientRect();
+    const tipRect  = tip.getBoundingClientRect();
+    const margin   = 8;
+    let above = true;
+    let top   = wordRect.top - tipRect.height - margin;
+    if (top < margin) { above = false; top = wordRect.bottom + margin; }
+    let left = wordRect.left + (wordRect.width / 2) - (tipRect.width / 2);
+    left = Math.max(margin, Math.min(window.innerWidth - tipRect.width - margin, left));
+    tip.style.top  = `${Math.round(top)}px`;
+    tip.style.left = `${Math.round(left)}px`;
+    tip.classList.toggle('below', !above);
+
+    // Mobile / tap path: auto-hide after a short window.
+    if (tipHideTimer) { clearTimeout(tipHideTimer); tipHideTimer = null; }
+    if (opts && opts.autoHideMs) {
+      tipHideTimer = setTimeout(hideTip, opts.autoHideMs);
+    }
+  }
+
+  // Event delegation on the transcript list — one set of listeners covers
+  // every sentence even though innerHTML is rebuilt on each render.
+  if (transcriptListEl) {
+    // Desktop hover
+    transcriptListEl.addEventListener('mouseover', (e) => {
+      const w = e.target.closest('.word');
+      if (!w || !transcriptListEl.contains(w)) return;
+      showTipFor(w);
+    });
+    transcriptListEl.addEventListener('mouseout', (e) => {
+      const w = e.target.closest('.word');
+      if (!w) return;
+      // Only hide if the pointer is actually leaving the word (not moving
+      // onto a child element).
+      if (w.contains(e.relatedTarget)) return;
+      hideTip();
+    });
+    // Mobile tap (also fires on desktop click — fine, mouseout still hides).
+    transcriptListEl.addEventListener('click', (e) => {
+      const w = e.target.closest('.word');
+      if (!w) return;
+      showTipFor(w, { autoHideMs: 2500 });
+    });
+    // Tooltip can't follow the word during scroll without jitter, so hide.
+    transcriptListEl.addEventListener('scroll', hideTip, { passive: true });
+  }
+  // Tapping anywhere outside the transcript dismisses any open tooltip.
+  document.addEventListener('click', (e) => {
+    if (!tipEl || tipEl.hidden) return;
+    if (e.target.closest('.word')) return;
+    hideTip();
+  });
+  window.addEventListener('resize', hideTip);
 
   // --- Progress recording ------------------------------------------------
   const queuedSends = new Set();
@@ -310,7 +521,7 @@
     const row = transcriptListEl.querySelector(`.t-sentence[data-idx="${idx}"]`);
     if (row) row.classList.add('single-play');
 
-    player.seekTo(s.ts_seconds, true);
+    player.seekTo(toPlayerTime(s.ts_seconds), true);
     player.playVideo();
     highlightSentence(idx);
     updatePlayButtonIcons();
@@ -356,8 +567,18 @@
     $('rewind3').addEventListener('click', () => {
       if (!playerReady) return;
       const t = player.getCurrentTime();
-      seekTo(Math.max(0, t - 3), findSentenceIdxAt(Math.max(0, t - 3)));
+      const newPlayerT = Math.max(0, t - 3);
+      seekTo(newPlayerT, findSentenceIdxAt(toTranscriptTime(newPlayerT)));
     });
+
+    // --- Sync adjuster (per-student fine-tune, persisted in localStorage) ---
+    const syncDown = $('sync-down');
+    const syncUp   = $('sync-up');
+    const syncReset = $('sync-reset');
+    if (syncDown)  syncDown.addEventListener('click',  () => adjustUserOffset(-USER_OFFSET_STEP));
+    if (syncUp)    syncUp.addEventListener('click',    () => adjustUserOffset(+USER_OFFSET_STEP));
+    if (syncReset) syncReset.addEventListener('click', () => adjustUserOffset(-userOffset));
+    renderSyncWidget();
 
     function setToggle(btn, value) {
       if (value) btn.classList.add('active'); else btn.classList.remove('active');
@@ -541,14 +762,18 @@
     const t = player.getCurrentTime();
     if (sentences.length === 0) return;
 
+    // All sentence timestamps live in transcript-time; translate the player's
+    // clock once so every comparison below uses the same frame.
+    const adjT = toTranscriptTime(t);
+
     // Single-sentence play: stop (or loop) at the next sentence boundary.
     if (singlePlayIdx >= 0) {
       const cur = sentences[singlePlayIdx];
       const end = sentenceEnd(singlePlayIdx);
-      if (t >= end - 0.05) {
+      if (adjT >= end - 0.05) {
         if (repeatSentenceOn) {
           // Repeat-sentence wins: loop this sentence rather than pausing.
-          player.seekTo(cur.ts_seconds, true);
+          player.seekTo(toPlayerTime(cur.ts_seconds), true);
         } else {
           try { player.pauseVideo(); } catch (_) {}
           stopSingleSentencePlay();
@@ -562,12 +787,12 @@
     // delay so the active sentence flips slightly BEFORE the speaker reaches
     // it, instead of trailing behind. findSentenceIdxAt already adds 0.05s
     // tolerance — bumping the input by another 0.10s gives the full 0.15s.
-    const idx = findSentenceIdxAt(t + 0.10);
+    const idx = findSentenceIdxAt(adjT + 0.10);
 
     if (repeatSentenceOn && lastSentenceIdx >= 0 && idx !== lastSentenceIdx) {
       const cur = sentences[lastSentenceIdx];
       if (cur) {
-        player.seekTo(cur.ts_seconds, true);
+        player.seekTo(toPlayerTime(cur.ts_seconds), true);
         player.playVideo();
         return;
       }

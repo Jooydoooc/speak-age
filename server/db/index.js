@@ -51,7 +51,7 @@ async function init() {
       id SERIAL PRIMARY KEY,
       title TEXT NOT NULL,
       youtube_url TEXT NOT NULL,
-      level TEXT NOT NULL CHECK (level IN ('beginner','intermediate','advanced')),
+      level TEXT NOT NULL,
       duration TEXT,
       topic TEXT,
       transcript TEXT,
@@ -61,6 +61,23 @@ async function init() {
       created_at TIMESTAMPTZ DEFAULT NOW()
     )
   `;
+  // Level migration: legacy values were lowercase beginner/intermediate/advanced.
+  // Curriculum is now five capitalized values. The constraint is renamed to _v2
+  // so this whole block stays idempotent across re-runs.
+  await sql`ALTER TABLE shadowing_lessons DROP CONSTRAINT IF EXISTS shadowing_lessons_level_check`;
+  await sql`UPDATE shadowing_lessons SET level = 'Beginner'   WHERE level = 'beginner'`;
+  await sql`UPDATE shadowing_lessons SET level = 'Elementary' WHERE level = 'intermediate'`;
+  await sql`UPDATE shadowing_lessons SET level = 'Graduation' WHERE level = 'advanced'`;
+  const hasLevelCheckV2 = await sql`
+    SELECT 1 FROM pg_constraint WHERE conname = 'shadowing_lessons_level_check_v2'
+  `;
+  if (hasLevelCheckV2.length === 0) {
+    await sql`
+      ALTER TABLE shadowing_lessons
+      ADD CONSTRAINT shadowing_lessons_level_check_v2
+      CHECK (level IN ('Beginner','Elementary','Pre-IELTS','Introduction','Graduation'))
+    `;
+  }
   await sql`ALTER TABLE shadowing_lessons ADD COLUMN IF NOT EXISTS phrases JSONB NOT NULL DEFAULT '[]'::jsonb`;
   // Video source tracking — 'youtube' (default for legacy rows) or 'cloudinary'.
   await sql`ALTER TABLE shadowing_lessons ADD COLUMN IF NOT EXISTS video_source TEXT NOT NULL DEFAULT 'youtube'`;
@@ -68,6 +85,9 @@ async function init() {
   await sql`ALTER TABLE shadowing_lessons ADD COLUMN IF NOT EXISTS cloudinary_public_id TEXT`;
   await sql`ALTER TABLE shadowing_lessons ADD COLUMN IF NOT EXISTS thumbnail_url TEXT`;
   await sql`ALTER TABLE shadowing_lessons ADD COLUMN IF NOT EXISTS duration_seconds INTEGER`;
+  // Transcript timing offset (seconds). Positive = delay highlights by N seconds
+  // because the speaker starts later than the transcript's first timestamp.
+  await sql`ALTER TABLE shadowing_lessons ADD COLUMN IF NOT EXISTS offset_seconds REAL NOT NULL DEFAULT 0`;
   // youtube_url was NOT NULL in the original schema; relax it now that Cloudinary
   // sources put their URL in video_url instead.
   await sql`ALTER TABLE shadowing_lessons ALTER COLUMN youtube_url DROP NOT NULL`;
