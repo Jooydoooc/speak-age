@@ -415,6 +415,13 @@
         <label>Transcript — one sentence per line, prefix each with <code>[m:ss]</code></label>
         <textarea id="lesson-transcript" required class="text-editor" style="min-height:180px"
           placeholder="[0:00] First sentence.&#10;[0:05] Second sentence."></textarea>
+        <div class="transcript-actions">
+          <button type="button" class="btn btn-ghost btn-sm" id="lesson-ai-fix">
+            <span class="ai-fix-label">🤖 Fix with AI</span>
+            <span class="ai-fix-spinner" aria-hidden="true" hidden></span>
+          </button>
+          <button type="button" class="btn btn-ghost btn-sm" id="lesson-transcript-clear">Clear</button>
+        </div>
       </div>
       <div class="form-row">
         <label>Key phrases — one per line: <code>m:ss | phrase | meaning | example</code></label>

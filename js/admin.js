@@ -380,6 +380,61 @@
     });
   }
 
+  // =========================================================
+  // AI transcript cleanup ("Fix with AI" + "Clear" buttons)
+  // =========================================================
+  const aiFixBtn  = document.getElementById('lesson-ai-fix');
+  const aiFixLbl  = aiFixBtn ? aiFixBtn.querySelector('.ai-fix-label') : null;
+  const aiFixSpin = aiFixBtn ? aiFixBtn.querySelector('.ai-fix-spinner') : null;
+  const clearBtn  = document.getElementById('lesson-transcript-clear');
+
+  function setAiFixLoading(loading) {
+    if (!aiFixBtn) return;
+    aiFixBtn.disabled = loading;
+    if (aiFixLbl)  aiFixLbl.textContent = loading ? 'Fixing…' : '🤖 Fix with AI';
+    if (aiFixSpin) aiFixSpin.hidden = !loading;
+  }
+
+  if (aiFixBtn) {
+    aiFixBtn.addEventListener('click', async () => {
+      const raw = (lEls.transcript.value || '').trim();
+      if (!raw) return toast('Paste a transcript first', 'error');
+      setAiFixLoading(true);
+      try {
+        const youtubeUrl = (lEls.source.value === 'youtube' && lEls.ytUrl.value) || '';
+        const r = await window.api('/api/ai/fix-transcript', {
+          method: 'POST',
+          body: { raw_transcript: raw, youtube_url: youtubeUrl }
+        });
+        if (r.ok && r.data && typeof r.data.cleaned === 'string' && r.data.cleaned.trim()) {
+          lEls.transcript.value = r.data.cleaned;
+          autoResize(lEls.transcript);
+          // Refresh the sync helper's "first transcript ts" hint if it's open,
+          // since the cleaned transcript may have a different first timestamp.
+          if (typeof refreshSyncFirstTs === 'function' && syncPreview && !syncPreview.hidden) {
+            refreshSyncFirstTs();
+          }
+          toast('Transcript cleaned ✓');
+        } else {
+          toast((r.data && r.data.error) || 'AI cleanup failed', 'error');
+        }
+      } catch (_) {
+        toast('AI cleanup failed', 'error');
+      } finally {
+        setAiFixLoading(false);
+      }
+    });
+  }
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      if (!lEls.transcript.value || confirm('Clear the transcript?')) {
+        lEls.transcript.value = '';
+        autoResize(lEls.transcript);
+      }
+    });
+  }
+
   // Phrases parser
   function parsePhrasesText(text) {
     const out = [];

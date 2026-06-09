@@ -18,6 +18,7 @@ const shadowingRouter = require('./routes/shadowing');
 const materialsRouter = require('./routes/materials');
 const adminRouter = require('./routes/admin');
 const progressRouter = require('./routes/progress');
+const aiRouter = require('./routes/ai');
 
 const app = express();
 app.disable('x-powered-by');
@@ -35,6 +36,7 @@ app.use('/api/shadowing', shadowingRouter);
 app.use('/api/materials', materialsRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/progress', progressRouter);
+app.use('/api/ai', aiRouter);
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
