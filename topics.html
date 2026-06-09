@@ -21,7 +21,7 @@
   <div class="container nav-inner">
     <a href="/index.html" class="logo"><svg class="logo-mark" viewBox="0 0 512 512" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="42" stroke-linecap="round" fill="none"><circle cx="256" cy="248" r="84"/><ellipse cx="256" cy="256" rx="180" ry="58" transform="rotate(-18 256 256)"/><path d="M 340 140 Q 358 118 380 132"/><path d="M 374 118 Q 394 100 416 118"/></g></svg><span class="logo-text">Speak<span class="underscore">_</span>Age</span></a>
     <ul class="nav-links">
-      <li><a href="/topics.html">Topics</a></li>
+      <li><a href="/topics.html" class="active">Topics</a></li>
       <li><a href="/shadowing.html">Shadowing</a></li>
       <li><a href="/exercises.html">Exercises</a></li>
       <li><a href="/materials.html">Materials</a></li>
@@ -37,7 +37,7 @@
 <section class="page-head">
   <div class="container">
     <h1>Speaking Topics</h1>
-    <p>248 examiner-grade questions across Parts 1, 2 and 3.</p>
+    <p>Practise IELTS Speaking Parts 1, 2 and 3 with examiner-grade prompts, model band 6.5 and band 8.0 answers, and a built-in recorder.</p>
     <input type="text" class="search-input" id="search" placeholder="Search topics…" />
   </div>
 </section>
@@ -58,6 +58,18 @@
 
   <div class="cards-grid" id="cards"></div>
 </div>
+
+<!-- Topic detail modal — opened on card click, closed by backdrop / ✕ / Esc -->
+<div class="topic-modal" id="topic-modal" hidden aria-hidden="true">
+  <div class="topic-modal-backdrop" data-close></div>
+  <div class="topic-modal-sheet" role="dialog" aria-modal="true" aria-labelledby="tm-title">
+    <button class="topic-modal-close" aria-label="Close" data-close>×</button>
+    <div class="topic-modal-inner" id="topic-modal-inner"><!-- filled by JS --></div>
+  </div>
+</div>
+
+<!-- Toast container (badge unlocks, errors, etc.) -->
+<div class="toast-stack" id="toast-stack" aria-live="polite"></div>
 
 <footer>
   <div class="container footer-inner">
