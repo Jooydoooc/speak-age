@@ -171,8 +171,9 @@ router.get('/topics', staffRead, async (_req, res) => {
   try {
     await ensureInit();
     const rows = await sql`
-      SELECT id, title, part, category, questions, answer_65, answer_80, draft,
-             created_at, updated_at
+      SELECT id, title, part, category, questions, answer_65, answer_80,
+             useful_vocabulary, common_mistakes, followup_questions,
+             draft, created_at, updated_at
       FROM topics ORDER BY draft DESC, updated_at DESC
     `;
     res.json({ topics: rows });
@@ -185,14 +186,24 @@ router.get('/topics', staffRead, async (_req, res) => {
 router.post('/topics', adminOnly, async (req, res) => {
   try {
     await ensureInit();
-    const { title, part, category, questions, answer_65, answer_80, draft } = req.body || {};
+    const {
+      title, part, category, questions, answer_65, answer_80, draft,
+      useful_vocabulary, common_mistakes, followup_questions
+    } = req.body || {};
     if (!title || !part || !category || !questions || !answer_65 || !answer_80) {
       return res.status(400).json({ error: 'All fields required' });
     }
     if (![1, 2, 3].includes(Number(part))) return res.status(400).json({ error: 'Invalid part' });
     const rows = await sql`
-      INSERT INTO topics (title, part, category, questions, answer_65, answer_80, draft, created_by)
-      VALUES (${title}, ${Number(part)}, ${category}, ${questions}, ${answer_65}, ${answer_80}, ${!!draft}, ${req.user.id})
+      INSERT INTO topics (
+        title, part, category, questions, answer_65, answer_80, draft, created_by,
+        useful_vocabulary, common_mistakes, followup_questions
+      )
+      VALUES (
+        ${title}, ${Number(part)}, ${category}, ${questions}, ${answer_65}, ${answer_80},
+        ${!!draft}, ${req.user.id},
+        ${useful_vocabulary || null}, ${common_mistakes || null}, ${followup_questions || null}
+      )
       RETURNING id
     `;
     res.json({ id: rows[0].id });
@@ -206,7 +217,10 @@ router.put('/topics/:id', adminOnly, async (req, res) => {
   try {
     await ensureInit();
     const id = Number(req.params.id);
-    const { title, part, category, questions, answer_65, answer_80, draft } = req.body || {};
+    const {
+      title, part, category, questions, answer_65, answer_80, draft,
+      useful_vocabulary, common_mistakes, followup_questions
+    } = req.body || {};
     if (!title || !part || !category || !questions || !answer_65 || !answer_80) {
       return res.status(400).json({ error: 'All fields required' });
     }
@@ -215,6 +229,9 @@ router.put('/topics/:id', adminOnly, async (req, res) => {
       UPDATE topics
       SET title = ${title}, part = ${Number(part)}, category = ${category},
           questions = ${questions}, answer_65 = ${answer_65}, answer_80 = ${answer_80},
+          useful_vocabulary = ${useful_vocabulary || null},
+          common_mistakes = ${common_mistakes || null},
+          followup_questions = ${followup_questions || null},
           draft = ${!!draft}, updated_at = NOW()
       WHERE id = ${id}
       RETURNING id

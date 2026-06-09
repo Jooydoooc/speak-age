@@ -19,6 +19,10 @@ const materialsRouter = require('./routes/materials');
 const adminRouter = require('./routes/admin');
 const progressRouter = require('./routes/progress');
 const aiRouter = require('./routes/ai');
+const recordingsRouter = require('./routes/recordings');
+const dashboardRouter = require('./routes/dashboard');
+const drillsRouter = require('./routes/drills');
+const badgesRouter = require('./routes/badges');
 
 const app = express();
 app.disable('x-powered-by');
@@ -37,6 +41,10 @@ app.use('/api/materials', materialsRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/progress', progressRouter);
 app.use('/api/ai', aiRouter);
+app.use('/api/recordings', recordingsRouter);
+app.use('/api/dashboard', dashboardRouter);
+app.use('/api/drills', drillsRouter);
+app.use('/api/badges', badgesRouter);
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
