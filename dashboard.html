@@ -12,7 +12,7 @@
 <link rel="manifest" href="/manifest.json" />
 <link rel="apple-touch-icon" href="/icon-192.svg" />
 <link rel="icon" type="image/svg+xml" href="/icon-192.svg" />
-<title>Dashboard — Speak_Age</title>
+<title>Speaking Dashboard — Speak_Age</title>
 <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
@@ -23,148 +23,124 @@
     <ul class="nav-links">
       <li><a href="/topics.html">Topics</a></li>
       <li><a href="/shadowing.html">Shadowing</a></li>
-      <li><a href="/exercises.html">Exercises</a></li>
+      <li><a href="/drills.html">Drills</a></li>
       <li><a href="/materials.html">Materials</a></li>
     </ul>
     <div class="nav-right">
       <button class="btn btn-ghost" id="logout">Sign out</button>
     </div>
-    <button class="menu-toggle"><span></span></button>
+    <button class="menu-toggle" aria-label="Toggle menu"><span></span></button>
   </div>
 </header>
 
-<div class="container">
+<main class="container dash-wrap">
 
-  <div class="welcome">
-    <div class="avatar-circle" id="avatar">??</div>
-    <div>
+  <!-- Greeting row -->
+  <section class="dash-hello">
+    <div class="avatar-circle" id="avatar">--</div>
+    <div class="dash-hello-text">
       <h1 id="greeting">Welcome back</h1>
-      <p id="subgreet">Keep your streak going.</p>
+      <p id="subgreet">Loading your speaking progress…</p>
     </div>
-  </div>
+    <div class="dash-streak" id="streak-chip" hidden>
+      <span class="dash-streak-icon">🔥</span>
+      <span class="dash-streak-text"><span id="streak-num">0</span> day streak</span>
+    </div>
+  </section>
 
-  <div class="stat-grid">
-    <div class="stat">
-      <div class="stat-label">Topics practiced</div>
-      <div class="stat-num" id="s-topics">0</div>
+  <!-- Hero band ring + next task -->
+  <section class="dash-hero">
+    <div class="dash-hero-left">
+      <div class="dash-band-wrap">
+        <svg class="dash-band-ring" viewBox="0 0 220 220" aria-hidden="true">
+          <circle class="dash-band-track" cx="110" cy="110" r="96" />
+          <circle class="dash-band-fill"  cx="110" cy="110" r="96" id="band-ring" />
+        </svg>
+        <div class="dash-band-center">
+          <div class="dash-band-eyebrow">Current band</div>
+          <div class="dash-band-num" id="band-num">—</div>
+          <div class="dash-band-target">Target <span id="band-target">7.0</span></div>
+        </div>
+      </div>
     </div>
-    <div class="stat">
-      <div class="stat-label">Lessons watched</div>
-      <div class="stat-num" id="s-lessons">0</div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">Exercises done</div>
-      <div class="stat-num" id="s-exercises">0</div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">Target band</div>
-      <div class="stat-num" id="s-band">7.5</div>
-    </div>
-  </div>
 
-  <div class="progress-section">
-    <h2 style="font-size:18px;margin-bottom:16px">Skill progress</h2>
-    <div class="progress-row">
-      <div class="progress-label">Fluency</div>
-      <div class="progress-bar"><div class="progress-fill" id="p-flu" style="width:0%"></div></div>
-      <div class="progress-pct" id="pct-flu">0%</div>
+    <div class="dash-hero-right">
+      <div class="dash-rank">
+        <div class="dash-rank-eyebrow">Speaking rank</div>
+        <div class="dash-rank-name" id="rank-name">—</div>
+      </div>
+      <a href="topics.html" class="dash-next" id="next-task">
+        <div class="dash-next-eyebrow">Next recommended task</div>
+        <div class="dash-next-title" id="next-task-title">Loading…</div>
+        <div class="dash-next-go">Go →</div>
+      </a>
+      <form class="dash-target-form" id="target-form">
+        <label for="target-input" class="dash-target-label">Set your target band</label>
+        <div class="dash-target-row">
+          <input type="number" id="target-input" min="4" max="9" step="0.5" value="7.0" />
+          <button type="submit" class="btn btn-ghost">Save</button>
+        </div>
+      </form>
     </div>
-    <div class="progress-row">
-      <div class="progress-label">Pronunciation</div>
-      <div class="progress-bar"><div class="progress-fill" id="p-pro" style="width:0%"></div></div>
-      <div class="progress-pct" id="pct-pro">0%</div>
-    </div>
-    <div class="progress-row">
-      <div class="progress-label">Vocabulary</div>
-      <div class="progress-bar"><div class="progress-fill" id="p-voc" style="width:0%"></div></div>
-      <div class="progress-pct" id="pct-voc">0%</div>
-    </div>
-    <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn btn-ghost btn-sm" data-bump="flu">+5% Fluency</button>
-      <button class="btn btn-ghost btn-sm" data-bump="pro">+5% Pronunciation</button>
-      <button class="btn btn-ghost btn-sm" data-bump="voc">+5% Vocabulary</button>
-    </div>
-  </div>
+  </section>
 
-  <h2 style="font-size:18px;margin:32px 0 16px">Recent activity</h2>
-  <div class="activity-list" id="activity-list"></div>
+  <!-- Counters -->
+  <section class="dash-counters">
+    <div class="dash-counter">
+      <div class="dash-counter-num" id="c-topics">0</div>
+      <div class="dash-counter-label">Topics practised</div>
+    </div>
+    <div class="dash-counter">
+      <div class="dash-counter-num" id="c-recordings">0</div>
+      <div class="dash-counter-label">Recordings submitted</div>
+    </div>
+    <div class="dash-counter">
+      <div class="dash-counter-num" id="c-streak">0</div>
+      <div class="dash-counter-label">Current streak</div>
+    </div>
+    <div class="dash-counter">
+      <div class="dash-counter-num" id="c-longest">0</div>
+      <div class="dash-counter-label">Longest streak</div>
+    </div>
+  </section>
 
-  <div style="height:80px"></div>
-</div>
+  <!-- Sub-score breakdown -->
+  <section class="dash-section">
+    <header class="dash-section-head">
+      <h2>Skill breakdown</h2>
+      <p>Average of your last 5 reviewed recordings.</p>
+    </header>
+    <div class="dash-bars" id="dash-bars"><!-- filled by JS --></div>
+    <div class="dash-weakest" id="dash-weakest" hidden>
+      <span class="dash-weakest-dot"></span>
+      <span>Weakest area: <strong id="weakest-name">—</strong></span>
+    </div>
+  </section>
+
+  <!-- Badges + rank ladder -->
+  <section class="dash-section">
+    <header class="dash-section-head">
+      <h2>Badges</h2>
+      <p>Earn badges by practising, submitting recordings, and improving your scores.</p>
+    </header>
+    <div class="badge-grid" id="badge-grid"><!-- filled by JS --></div>
+  </section>
+
+  <!-- Teacher feedback history -->
+  <section class="dash-section">
+    <header class="dash-section-head">
+      <h2>Teacher feedback</h2>
+      <p>Tap a card to see the full written feedback.</p>
+    </header>
+    <div class="feedback-list" id="feedback-list"><!-- filled by JS --></div>
+  </section>
+
+  <div class="dash-footer-spacer"></div>
+</main>
+
+<div class="toast-stack" id="toast-stack" aria-live="polite"></div>
 
 <script src="/js/main.js"></script>
-<script>
-(async function () {
-  const user = await window.requireAuth();
-  if (!user) return;
-
-  document.getElementById('avatar').textContent = window.initials(user.name || user.email);
-  document.getElementById('greeting').textContent = `Welcome back, ${user.name || user.email.split('@')[0]}`;
-
-  // Progress is stored in localStorage (per spec) — UI mirror only, not sensitive.
-  const KEY = `speak_age_progress_${user.id}`;
-  const defaults = { flu: 35, pro: 50, voc: 42, topics: 12, lessons: 8, exercises: 5, band: '7.5' };
-  let p = JSON.parse(localStorage.getItem(KEY) || 'null') || defaults;
-  function save() { localStorage.setItem(KEY, JSON.stringify(p)); }
-
-  function paint() {
-    document.getElementById('s-topics').textContent = p.topics;
-    document.getElementById('s-lessons').textContent = p.lessons;
-    document.getElementById('s-exercises').textContent = p.exercises;
-    document.getElementById('s-band').textContent = p.band;
-    for (const k of ['flu','pro','voc']) {
-      const pct = Math.min(100, Math.max(0, p[k]));
-      document.getElementById(`p-${k}`).style.width = pct + '%';
-      document.getElementById(`pct-${k}`).textContent = pct + '%';
-    }
-  }
-  paint();
-
-  document.querySelectorAll('[data-bump]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const k = btn.getAttribute('data-bump');
-      p[k] = Math.min(100, (p[k] || 0) + 5);
-      save(); paint();
-    });
-  });
-
-  // Activity feed — fetched from API if available, else fallback to local
-  const list = document.getElementById('activity-list');
-  function esc(s) {
-    return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
-  }
-  function timeAgo(iso) {
-    if (!iso) return '';
-    const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
-    if (s < 60) return 'just now';
-    if (s < 3600) return Math.floor(s/60) + 'm ago';
-    if (s < 86400) return Math.floor(s/3600) + 'h ago';
-    return Math.floor(s/86400) + 'd ago';
-  }
-  const { ok, data } = await window.api('/api/progress/activity');
-  const items = ok && data.activity && data.activity.length ? data.activity : [
-    { action: 'topic_studied', detail: 'Reviewed: Describe a memorable journey', created_at: new Date(Date.now()-3600000).toISOString() },
-    { action: 'lesson_watched', detail: 'Shadowing: A day in Cambridge', created_at: new Date(Date.now()-86400000).toISOString() },
-    { action: 'fluency_completed', detail: '2-minute fluency challenge', created_at: new Date(Date.now()-172800000).toISOString() }
-  ];
-  list.innerHTML = items.map(a => `
-    <div class="activity-item">
-      <div class="activity-icon">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-      </div>
-      <div class="activity-text">${esc(a.detail)}</div>
-      <div class="activity-time">${timeAgo(a.created_at)}</div>
-    </div>
-  `).join('');
-
-  const logoutBtn = document.getElementById('logout');
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', async () => {
-      await window.api('/api/auth/logout', { method: 'POST' });
-      location.href = '/index.html';
-    });
-  }
-})();
-</script>
+<script src="/js/dashboard.js"></script>
 </body>
 </html>
