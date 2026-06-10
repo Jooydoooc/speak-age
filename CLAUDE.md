@@ -72,11 +72,9 @@ CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET,
 GEMINI_API_KEY, OPENAI_API_KEY
 
 ## Branch Rules
-- ALWAYS start with: git checkout dev
-- NEVER commit to main directly
-- After every change: npm run save-dev
-- When user says "go live": npm run go-live
-- User merges PR on GitHub manually
+- Work directly on the main branch: git checkout main
+- Commit changes straight to main (this ships to live production)
+- After every change: commit and push to main
 
 ## General Rules
 - Never hardcode secrets
@@ -84,7 +82,7 @@ GEMINI_API_KEY, OPENAI_API_KEY
 - Ask before deleting anything
 - Mobile responsive always (min tap target 44px)
 - Dark theme: bg #09090b, surface #0f0f12, accent #6d28d9
-- After every task: run npm run save-dev automatically
+- After every task: commit and push to main automatically
 
 ## Known Issues
 - Transcript sync offset: use offset_seconds field to fix timing
@@ -93,7 +91,7 @@ GEMINI_API_KEY, OPENAI_API_KEY
 
 ## Session Start Checklist
 1. Read this file
-2. git checkout dev
+2. git checkout main
 3. Ask: "What would you like to work on today?"
 4. Work only on relevant files
-5. After finishing: npm run save-dev
+5. After finishing: commit and push to main
