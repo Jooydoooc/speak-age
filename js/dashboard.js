@@ -45,6 +45,7 @@
   renderFeedback(dash.feedback_history || []);
   wireTargetForm(dash.progress.target_band);
   updateSubgreet(dash);
+  surfaceNewBadges(badges);
 
   // =========================================================
   // Renderers
@@ -168,6 +169,27 @@
       document.getElementById('band-target').textContent = t.toFixed(1);
       toast(`Target band set to ${t.toFixed(1)}`, 'success');
     });
+  }
+
+  // Compare currently-earned badges with the snapshot from the previous
+  // dashboard visit (stored per user in localStorage). Toast each newcomer.
+  function surfaceNewBadges(allBadges) {
+    const earnedSlugs = allBadges.filter(b => b.earned).map(b => b.slug);
+    const KEY = `speak_age_badges_seen_${user.id}`;
+    let prev;
+    try { prev = JSON.parse(localStorage.getItem(KEY) || '[]'); }
+    catch { prev = []; }
+    const prevSet = new Set(prev);
+    const fresh = earnedSlugs.filter(s => !prevSet.has(s));
+    fresh.forEach((slug, i) => {
+      const b = allBadges.find(x => x.slug === slug);
+      setTimeout(() => toast(`Badge unlocked: ${b ? b.title : slug.replace(/-/g, ' ')}`, 'badge'), i * 400);
+    });
+    if (fresh.length) localStorage.setItem(KEY, JSON.stringify(earnedSlugs));
+    else if (prev.length !== earnedSlugs.length) {
+      // Keep cache in sync even when nothing new (e.g. user lost a badge by reset).
+      localStorage.setItem(KEY, JSON.stringify(earnedSlugs));
+    }
   }
 
   function updateSubgreet(d) {

@@ -93,6 +93,7 @@
     if (name === 'content'  && isStaff && window.loadAdminContent)    window.loadAdminContent();
     if (name === 'students' && isStaff && window.loadAdminStudents)   window.loadAdminStudents();
     if (name === 'stats'    && isStaff && window.loadAdminSiteStats)  window.loadAdminSiteStats();
+    if (name === 'reviews'  && isStaff && window.loadReviewInbox)     window.loadReviewInbox();
   }
   tabs.forEach(t => t.addEventListener('click', () => selectTab(t.dataset.ptab)));
   window.addEventListener('hashchange', () => selectTab((location.hash || '').replace(/^#/, '')));

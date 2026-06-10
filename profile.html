@@ -52,6 +52,9 @@
     <button class="profile-tab" type="button" role="tab" data-ptab="stats" data-role-staff>
       <span class="profile-tab-icon" aria-hidden="true">📈</span> Stats
     </button>
+    <button class="profile-tab" type="button" role="tab" data-ptab="reviews" data-role-staff>
+      <span class="profile-tab-icon" aria-hidden="true">🎙️</span> Reviews
+    </button>
   </div>
 
   <!-- ===== Profile tab ===== -->
@@ -252,6 +255,23 @@
           <div class="muted-inline" style="padding:20px;text-align:center">—</div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ===== Reviews tab — admin/teacher (Phase 6) ===== -->
+  <section class="profile-tab-panel" data-ptab-panel="reviews">
+    <div class="review-head">
+      <h2 class="review-title">Speaking review inbox</h2>
+      <p class="review-sub">Listen to student recordings, score the five sub-bands, and leave written feedback.</p>
+    </div>
+    <div class="review-filters" id="review-filters">
+      <button class="pill active" data-status="all">All</button>
+      <button class="pill" data-status="submitted">Submitted</button>
+      <button class="pill" data-status="reviewed">Reviewed</button>
+      <button class="pill" data-status="needs_improvement">Needs improvement</button>
+    </div>
+    <div class="review-inbox" id="review-inbox">
+      <div class="review-empty">Loading recordings…</div>
     </div>
   </section>
 
@@ -509,5 +529,7 @@
 <script src="/js/main.js"></script>
 <script src="/js/profile.js"></script>
 <script src="/js/admin.js"></script>
+<script src="/js/profile-reviews.js"></script>
+<div class="toast-stack" id="toast-stack" aria-live="polite"></div>
 </body>
 </html>

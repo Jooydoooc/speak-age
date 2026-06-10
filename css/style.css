@@ -4011,6 +4011,276 @@ body.modal-open { overflow: hidden; }
   .drill-grid { grid-template-columns: 1fr; }
 }
 
+/* =========================================================
+   Teacher review inbox (profile.html → Reviews tab)
+   ========================================================= */
+
+.review-head { margin-bottom: 14px; }
+.review-title { font-size: 20px; font-weight: 600; letter-spacing: -0.02em; }
+.review-sub { color: var(--muted); font-size: 13.5px; margin-top: 4px; }
+
+.review-filters {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin-bottom: 16px;
+}
+
+.review-inbox { display: flex; flex-direction: column; gap: 10px; }
+
+.review-empty {
+  padding: 36px 24px;
+  text-align: center;
+  color: var(--muted);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+}
+
+.review-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+.review-card[open] { border-color: rgba(109,40,217,0.45); }
+.review-card > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 14px 18px;
+}
+.review-card > summary::-webkit-details-marker { display: none; }
+
+.review-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.review-row-main { min-width: 0; flex: 1; }
+.review-row-title {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.review-row-meta {
+  font-size: 12.5px;
+  color: var(--muted);
+  margin-top: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.review-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  border: 1px solid transparent;
+  flex-shrink: 0;
+}
+.review-status-submitted {
+  background: rgba(59,130,246,0.12);
+  border-color: rgba(59,130,246,0.45);
+  color: #93c5fd;
+}
+.review-status-reviewed {
+  background: rgba(20,184,166,0.12);
+  border-color: rgba(20,184,166,0.45);
+  color: #5eead4;
+}
+.review-status-needs_improvement {
+  background: rgba(245,158,11,0.14);
+  border-color: rgba(245,158,11,0.45);
+  color: #fcd34d;
+}
+
+.review-detail {
+  border-top: 1px solid var(--border);
+  padding: 18px;
+}
+.review-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 360px);
+  gap: 18px;
+}
+.review-grid-left {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+.review-cue {
+  background: var(--surface);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+.review-cue p {
+  font-size: 13.5px;
+  line-height: 1.55;
+  margin-top: 4px;
+}
+.review-prev-meta {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.review-form {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.review-slider { display: block; }
+.review-slider-head {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 6px;
+}
+.review-slider input[type=range] {
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 999px;
+  outline: none;
+}
+.review-slider input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--surface);
+  cursor: pointer;
+  box-shadow: 0 0 0 2px rgba(109,40,217,0.35);
+}
+.review-slider input[type=range]::-moz-range-thumb {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--surface);
+  cursor: pointer;
+}
+.review-slider output {
+  font-size: 14px;
+  font-weight: 600;
+  font-feature-settings: 'tnum';
+  color: var(--accent-hover);
+  min-width: 18px;
+  text-align: right;
+}
+
+.review-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.review-field-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  font-weight: 600;
+}
+.review-field input[type=number],
+.review-field textarea {
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14.5px;
+  line-height: 1.5;
+}
+.review-field input[type=number]:focus,
+.review-field textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.review-status-group {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+.review-status-group legend {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  padding: 0 6px;
+}
+.review-status-group label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+}
+.review-status-group input[type=radio] { accent-color: var(--accent); }
+
+.review-form-actions { display: flex; justify-content: flex-end; }
+.review-form-msg {
+  font-size: 13px;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+.review-form-msg-success {
+  background: rgba(20,184,166,0.12);
+  border: 1px solid rgba(20,184,166,0.45);
+  color: #5eead4;
+}
+.review-form-msg-error {
+  background: rgba(244,63,94,0.12);
+  border: 1px solid rgba(244,63,94,0.5);
+  color: #fca5a5;
+}
+
+/* Review responsive */
+@media (max-width: 768px) {
+  .review-grid { grid-template-columns: 1fr; }
+}
+
+/* =========================================================
+   Premium polish pass — subtle page entrance + tap targets
+   ========================================================= */
+
+/* Soft page fade-in for any main container content */
+.dash-wrap > section,
+.topic-card,
+.drill-card,
+.lesson-card,
+.review-card {
+  animation: page-rise 0.36s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+@keyframes page-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Make sure all primary action buttons hit the recommended tap size */
+.btn-primary,
+.btn-ghost { min-height: 36px; }
+@media (max-width: 480px) {
+  .btn-primary,
+  .btn-ghost { min-height: 44px; }
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
