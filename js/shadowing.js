@@ -20,7 +20,18 @@
   async function load() {
     const { ok, data } = await window.api('/api/shadowing');
     lessons = ok ? (data.lessons || []) : [];
+    paintCounts();
     render();
+  }
+
+  // Fill the count badge next to each level in the sidebar.
+  function paintCounts() {
+    const counts = {};
+    for (const l of lessons) counts[l.level] = (counts[l.level] || 0) + 1;
+    document.querySelectorAll('[data-count]').forEach(el => {
+      const key = el.getAttribute('data-count');
+      el.textContent = key === 'all' ? lessons.length : (counts[key] || 0);
+    });
   }
 
   function render() {
