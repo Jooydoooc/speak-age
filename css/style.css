@@ -4281,6 +4281,133 @@ body.modal-open { overflow: hidden; }
   .btn-ghost { min-height: 44px; }
 }
 
+/* =========================================================
+   Shadowing — two-column layout with vertical level sidebar
+   ========================================================= */
+
+.shadowing-layout {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+  padding: 24px 0 56px;
+}
+
+.level-sidebar {
+  position: sticky;
+  top: calc(60px + 16px); /* below nav */
+  align-self: start;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+}
+
+.level-sidebar-head {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  font-weight: 600;
+  padding: 4px 8px 12px;
+}
+
+.level-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.level-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-align: left;
+  transition: background 0.14s, color 0.14s;
+  border: 1px solid transparent;
+  min-height: 40px;
+}
+.level-item:hover {
+  background: var(--card);
+  color: var(--text);
+}
+.level-item.active {
+  background: linear-gradient(180deg, rgba(109,40,217,0.16), rgba(109,40,217,0.04));
+  border-color: rgba(109,40,217,0.45);
+  color: var(--text);
+}
+
+.level-item-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.04);
+}
+.level-item-name { flex: 1; min-width: 0; }
+.level-item-count {
+  font-size: 12px;
+  color: var(--muted);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 1px 8px;
+  min-width: 24px;
+  text-align: center;
+  font-feature-settings: 'tnum';
+}
+.level-item.active .level-item-count {
+  color: var(--accent-hover);
+  border-color: rgba(109,40,217,0.5);
+  background: rgba(109,40,217,0.16);
+}
+
+.shadowing-main {
+  min-width: 0; /* prevents grid item from overflowing */
+}
+.shadowing-main .cards-grid {
+  padding: 0; /* layout already has padding */
+}
+
+/* Mobile: collapse sidebar to a horizontal scroll strip above the cards */
+@media (max-width: 768px) {
+  .shadowing-layout {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 16px 0 40px;
+  }
+  .level-sidebar {
+    position: static;
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+  }
+  .level-sidebar-head { display: none; }
+  .level-menu {
+    flex-direction: row;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 6px;
+    padding-bottom: 2px;
+  }
+  .level-menu::-webkit-scrollbar { display: none; }
+  .level-item {
+    flex-shrink: 0;
+    width: auto;
+    padding: 8px 12px;
+    min-height: 40px;
+  }
+  .level-item-name { flex: none; }
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
