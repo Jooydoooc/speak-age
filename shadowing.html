@@ -33,13 +33,6 @@
   </div>
 </header>
 
-<section class="page-head">
-  <div class="container">
-    <h1>Shadowing Lessons</h1>
-    <p>Mirror native speakers, line by line. Build rhythm, intonation and accuracy.</p>
-  </div>
-</section>
-
 <div class="container">
 
   <!-- Top bar: search + sort -->
@@ -66,8 +59,26 @@
 
     <!-- Level menu — vertical sidebar on desktop, horizontal pill strip on mobile -->
     <aside class="level-sidebar">
-      <div class="level-sidebar-head">Levels</div>
-      <nav class="level-menu" id="filters" role="tablist" aria-label="Lesson level">
+      <!-- Brand title with icon, above the levels panel -->
+      <div class="shadowing-brand">
+        <span class="shadowing-brand-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="3" y2="12"></line>
+            <line x1="6" y1="9" x2="6" y2="15"></line>
+            <line x1="9" y1="5" x2="9" y2="19"></line>
+            <line x1="12" y1="8" x2="12" y2="16"></line>
+            <line x1="15" y1="3" x2="15" y2="21"></line>
+            <line x1="18" y1="7" x2="18" y2="17"></line>
+            <line x1="21" y1="10" x2="21" y2="14"></line>
+          </svg>
+        </span>
+        <span class="shadowing-brand-text">Shadowing</span>
+      </div>
+
+      <!-- Levels — separate panel -->
+      <div class="level-panel">
+        <div class="level-sidebar-head">Levels</div>
+        <nav class="level-menu" id="filters" role="tablist" aria-label="Lesson level">
         <button class="level-item active" type="button" role="tab" data-level="all">
           <span class="level-item-name">All</span>
           <span class="level-item-count" data-count="all">0</span>
@@ -97,7 +108,8 @@
           <span class="level-item-name">Graduation</span>
           <span class="level-item-count" data-count="Graduation">0</span>
         </button>
-      </nav>
+        </nav>
+      </div>
     </aside>
 
     <!-- Cards area -->
