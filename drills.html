@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#09090b" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Speak_Age" />
+<meta name="format-detection" content="telephone=no" />
+<link rel="manifest" href="/manifest.json" />
+<link rel="apple-touch-icon" href="/icon-192.svg" />
+<link rel="icon" type="image/svg+xml" href="/icon-192.svg" />
+<title>Pronunciation Drills — Speak_Age</title>
+<link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+<header class="nav">
+  <div class="container nav-inner">
+    <a href="/index.html" class="logo"><svg class="logo-mark" viewBox="0 0 512 512" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="42" stroke-linecap="round" fill="none"><circle cx="256" cy="248" r="84"/><ellipse cx="256" cy="256" rx="180" ry="58" transform="rotate(-18 256 256)"/><path d="M 340 140 Q 358 118 380 132"/><path d="M 374 118 Q 394 100 416 118"/></g></svg><span class="logo-text">Speak<span class="underscore">_</span>Age</span></a>
+    <ul class="nav-links">
+      <li><a href="/topics.html">Topics</a></li>
+      <li><a href="/shadowing.html">Shadowing</a></li>
+      <li><a href="/drills.html" class="active">Drills</a></li>
+      <li><a href="/materials.html">Materials</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="/login.html" class="btn btn-ghost" id="nav-signin">Sign in</a>
+      <a href="/register.html" class="btn btn-primary" id="nav-cta">Get started</a>
+    </div>
+    <button class="menu-toggle" aria-label="Toggle menu"><span></span></button>
+  </div>
+</header>
+
+<section class="page-head">
+  <div class="container">
+    <h1>Pronunciation Drills</h1>
+    <p>Nine targeted drills built for Uzbek learners. Read the rule, try the examples out loud, and record yourself to compare.</p>
+  </div>
+</section>
+
+<div class="container">
+  <div class="filters" id="filters">
+    <button class="pill active" data-cat="all">All drills</button>
+    <button class="pill" data-cat="Consonants">Consonants</button>
+    <button class="pill" data-cat="Stress">Stress</button>
+    <button class="pill" data-cat="Prosody">Prosody</button>
+    <button class="pill" data-cat="Connected speech">Connected speech</button>
+    <button class="pill" data-cat="Word endings">Word endings</button>
+  </div>
+
+  <div class="drill-grid" id="drills"></div>
+</div>
+
+<!-- Drill detail modal -->
+<div class="topic-modal" id="drill-modal" hidden aria-hidden="true">
+  <div class="topic-modal-backdrop" data-close></div>
+  <div class="topic-modal-sheet" role="dialog" aria-modal="true" aria-labelledby="dm-title">
+    <button class="topic-modal-close" aria-label="Close" data-close>×</button>
+    <div class="topic-modal-inner" id="drill-modal-inner"></div>
+  </div>
+</div>
+
+<div class="toast-stack" id="toast-stack" aria-live="polite"></div>
+
+<footer>
+  <div class="container footer-inner">
+    <a href="/index.html" class="logo"><svg class="logo-mark" viewBox="0 0 512 512" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="42" stroke-linecap="round" fill="none"><circle cx="256" cy="248" r="84"/><ellipse cx="256" cy="256" rx="180" ry="58" transform="rotate(-18 256 256)"/><path d="M 340 140 Q 358 118 380 132"/><path d="M 374 118 Q 394 100 416 118"/></g></svg><span class="logo-text">Speak<span class="underscore">_</span>Age</span></a>
+    <ul class="footer-links"><li><a href="#">Privacy</a></li><li><a href="#">Terms</a></li><li><a href="#">Contact</a></li></ul>
+  </div>
+</footer>
+
+<script src="/js/main.js"></script>
+<script src="/js/drills.js"></script>
+</body>
+</html>

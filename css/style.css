@@ -3895,6 +3895,122 @@ body.modal-open { overflow: hidden; }
   .fb-band-num { font-size: 18px; }
 }
 
+/* =========================================================
+   Pronunciation Drills page
+   ========================================================= */
+
+.drill-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+  padding: 24px 0 56px;
+}
+
+.drill-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 22px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+  position: relative;
+  overflow: hidden;
+  outline: none;
+}
+.drill-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at 100% 0%, rgba(20,184,166,0.10), transparent 50%);
+  opacity: 0;
+  transition: opacity 0.18s ease;
+  pointer-events: none;
+}
+.drill-card:hover,
+.drill-card:focus-visible {
+  transform: translateY(-2px);
+  border-color: rgba(20,184,166,0.45);
+  box-shadow: 0 10px 30px -18px rgba(20,184,166,0.45);
+}
+.drill-card:hover::before,
+.drill-card:focus-visible::before { opacity: 1; }
+
+.drill-card-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
+}
+.drill-card-cat {
+  font-size: 11.5px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.drill-card-title {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+.drill-card-desc {
+  color: var(--muted);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+.drill-card-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 4px;
+  font-size: 12.5px;
+}
+.drill-card-count { color: var(--teal); font-weight: 500; }
+
+.drills-signin {
+  grid-column: 1 / -1;
+  padding: 56px 24px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+.drills-signin h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.drills-signin p { color: var(--muted); margin-bottom: 18px; }
+.drills-signin-actions {
+  display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+}
+
+/* Drill detail (in topic modal shell) */
+.drill-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.drill-rule p {
+  color: var(--text);
+  font-size: 14.5px;
+  line-height: 1.65;
+  margin-top: 6px;
+}
+.drill-chip {
+  font-size: 14px;
+  padding: 8px 14px;
+  background: linear-gradient(180deg, rgba(20,184,166,0.10), var(--card));
+  border-color: rgba(20,184,166,0.35);
+  color: var(--text);
+}
+.drill-practice .practice-hint { margin-top: 6px; }
+
+/* Drill grid responsive */
+@media (max-width: 480px) {
+  .drill-grid { grid-template-columns: 1fr; }
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
