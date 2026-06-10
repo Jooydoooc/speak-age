@@ -160,6 +160,16 @@ async function setupProfileMenu() {
   const roleLabel = user.role === 'admin' ? 'Admin'
                   : user.role === 'teacher' ? 'Teacher' : '';
 
+  // Logged-in users get a Dashboard link in the main nav (anonymous users don't).
+  // Injected once; highlighted active when we're on the dashboard page.
+  const navLinks = document.querySelector('.nav-links');
+  if (navLinks && !navLinks.querySelector('a[href="/dashboard.html"]')) {
+    const onDash = /\/dashboard(?:\.html)?$/.test(location.pathname);
+    const li = document.createElement('li');
+    li.innerHTML = `<a href="/dashboard.html"${onDash ? ' class="active"' : ''}>Dashboard</a>`;
+    navLinks.appendChild(li);
+  }
+
   // Floating settings FAB — single entry point for the profile (and from there
   // to the admin panel, for admin/teacher). Always purple, always /profile.html.
   const onProfile = /\/profile(?:\.html)?$/.test(location.pathname);
@@ -187,6 +197,10 @@ async function setupProfileMenu() {
           <div class="profile-dropdown-email">${escHtml(user.email)}</div>
         </div>
         <div class="profile-dropdown-divider"></div>
+        <a class="profile-dropdown-item" href="/dashboard.html" role="menuitem">
+          <span class="profile-dropdown-icon" aria-hidden="true">📊</span>
+          Dashboard
+        </a>
         <a class="profile-dropdown-item" href="/profile.html" role="menuitem">
           <span class="profile-dropdown-icon" aria-hidden="true">👤</span>
           My Profile
