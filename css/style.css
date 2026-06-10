@@ -2620,7 +2620,7 @@ body.modal-open { overflow: hidden; }
   color: var(--muted); font-size: 14px;
 }
 
-/* Practice Mode panel — sits above the controls, drives them via presets */
+/* Practice Mode panel — sits above the controls; only swaps the instruction text */
 .practice-mode {
   margin-top: 16px;
   display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
@@ -2636,20 +2636,27 @@ body.modal-open { overflow: hidden; }
 .practice-mode-options { display: flex; gap: 8px; flex-wrap: wrap; }
 .practice-mode-btn {
   display: inline-flex; align-items: center; gap: 6px;
-  padding: 0 14px; min-height: 40px;
+  padding: 0 16px; min-height: 40px;
   background: var(--card);
   border: 1px solid var(--border);
   color: var(--muted);
   border-radius: var(--radius-pill);
   font-size: 13px; font-weight: 500;
   cursor: pointer;
-  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
 }
 .practice-mode-btn:hover { border-color: var(--accent); color: var(--text); }
 .practice-mode-btn.active {
-  background: var(--accent); border-color: var(--accent); color: #fff;
+  background: #6d28d9; border-color: #6d28d9; color: #fff;
 }
-.practice-mode-icon { font-size: 14px; line-height: 1; }
+/* Instruction line for the active mode — full width below the pills */
+.practice-mode-hint {
+  flex-basis: 100%;
+  margin: 2px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
+}
 @media (max-width: 768px) {
   .practice-mode-options {
     width: 100%;
