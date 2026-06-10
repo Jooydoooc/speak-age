@@ -41,38 +41,59 @@
 </section>
 
 <div class="container">
+
+  <!-- Top bar: search + sort -->
+  <div class="shadowing-topbar">
+    <div class="shadowing-search">
+      <svg class="shadowing-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input type="search" id="search" placeholder="Search lessons..." aria-label="Search lessons" />
+    </div>
+    <div class="shadowing-sort">
+      <label for="sort" class="shadowing-sort-label">Sort</label>
+      <select id="sort" aria-label="Sort lessons">
+        <option value="newest">Newest</option>
+        <option value="oldest">Oldest</option>
+        <option value="az">A–Z</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Sidebar + grid -->
   <div class="shadowing-layout">
 
-    <!-- Vertical level menu (sidebar on desktop, horizontal strip on mobile) -->
+    <!-- Level menu — vertical sidebar on desktop, horizontal pill strip on mobile -->
     <aside class="level-sidebar">
       <div class="level-sidebar-head">Levels</div>
       <nav class="level-menu" id="filters" role="tablist" aria-label="Lesson level">
         <button class="level-item active" type="button" role="tab" data-level="all">
-          <span class="level-item-name">All levels</span>
+          <span class="level-item-name">All</span>
           <span class="level-item-count" data-count="all">0</span>
         </button>
         <button class="level-item" type="button" role="tab" data-level="Beginner">
-          <span class="level-item-dot" style="background:#22c55e"></span>
+          <span class="level-item-dot" style="background:#0f6e56"></span>
           <span class="level-item-name">Beginner</span>
           <span class="level-item-count" data-count="Beginner">0</span>
         </button>
         <button class="level-item" type="button" role="tab" data-level="Elementary">
-          <span class="level-item-dot" style="background:#14b8a6"></span>
+          <span class="level-item-dot" style="background:#0a6b6b"></span>
           <span class="level-item-name">Elementary</span>
           <span class="level-item-count" data-count="Elementary">0</span>
         </button>
         <button class="level-item" type="button" role="tab" data-level="Pre-IELTS">
-          <span class="level-item-dot" style="background:#3b82f6"></span>
+          <span class="level-item-dot" style="background:#1a4fa0"></span>
           <span class="level-item-name">Pre-IELTS</span>
           <span class="level-item-count" data-count="Pre-IELTS">0</span>
         </button>
         <button class="level-item" type="button" role="tab" data-level="Introduction">
-          <span class="level-item-dot" style="background:#a855f7"></span>
+          <span class="level-item-dot" style="background:#3c3489"></span>
           <span class="level-item-name">Introduction</span>
           <span class="level-item-count" data-count="Introduction">0</span>
         </button>
         <button class="level-item" type="button" role="tab" data-level="Graduation">
-          <span class="level-item-dot" style="background:#f59e0b"></span>
+          <span class="level-item-dot" style="background:#633806"></span>
           <span class="level-item-name">Graduation</span>
           <span class="level-item-count" data-count="Graduation">0</span>
         </button>

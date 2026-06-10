@@ -1,4 +1,5 @@
 // Shadowing list — students only. Cards link to /shadowing-lesson.html?id=N.
+// Filters by level (sidebar), full-text search, and sort (newest / oldest / A-Z).
 
 (async function () {
   const user = await window.requireAuth();
@@ -6,8 +7,13 @@
 
   const lessonsEl = document.getElementById('lessons');
   const filtersEl = document.getElementById('filters');
+  const searchEl  = document.getElementById('search');
+  const sortEl    = document.getElementById('sort');
+
   let lessons = [];
-  let level = 'all';
+  let level   = 'all';
+  let query   = '';
+  let sortBy  = 'newest';
 
   function esc(s) {
     return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
@@ -35,9 +41,27 @@
   }
 
   function render() {
-    const list = level === 'all' ? lessons : lessons.filter(l => l.level === level);
+    let list = level === 'all' ? lessons.slice() : lessons.filter(l => l.level === level);
+
+    if (query) {
+      const q = query.toLowerCase();
+      list = list.filter(l => {
+        const hay = ((l.title || '') + ' ' + (l.topic || '') + ' ' + (l.level || '')).toLowerCase();
+        return hay.includes(q);
+      });
+    }
+
+    // Sort — API returns newest first by default; we re-sort client-side
+    // because both other modes (oldest, A-Z) need it.
+    list.sort((a, b) => {
+      if (sortBy === 'az') return String(a.title || '').localeCompare(String(b.title || ''));
+      const at = new Date(a.created_at).getTime() || 0;
+      const bt = new Date(b.created_at).getTime() || 0;
+      return sortBy === 'oldest' ? at - bt : bt - at;
+    });
+
     if (list.length === 0) {
-      lessonsEl.innerHTML = `<div style="padding:48px;color:var(--muted);text-align:center;grid-column:1/-1">No lessons available.</div>`;
+      lessonsEl.innerHTML = `<div class="shadowing-empty">${query ? 'No lessons match your search.' : 'No lessons available.'}</div>`;
       return;
     }
     lessonsEl.innerHTML = list.map(l => {
@@ -74,6 +98,9 @@
     level = btn.getAttribute('data-level');
     render();
   });
+
+  if (searchEl) searchEl.addEventListener('input', (e) => { query = e.target.value.trim(); render(); });
+  if (sortEl)   sortEl.addEventListener('change', (e) => { sortBy = e.target.value; render(); });
 
   load();
 })();
