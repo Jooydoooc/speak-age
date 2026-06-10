@@ -4290,7 +4290,7 @@ body.modal-open { overflow: hidden; }
   display: flex;
   gap: 12px;
   align-items: center;
-  padding: 20px 0 16px;
+  padding: 40px 0 24px;
 }
 .shadowing-search {
   flex: 1;
@@ -4359,9 +4359,9 @@ body.modal-open { overflow: hidden; }
   padding: 0 0 56px;
 }
 
-/* Left sidebar — 200px, sticky, transparent (no card chrome) */
+/* Left sidebar — 220px, sticky */
 .level-sidebar {
-  width: 200px;
+  width: 220px;
   flex-shrink: 0;
   position: sticky;
   top: 80px;
@@ -4369,13 +4369,50 @@ body.modal-open { overflow: hidden; }
   border: none;
   padding: 0;
 }
+
+/* Brand title with icon, above the levels panel */
+.shadowing-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 4px 16px;
+}
+.shadowing-brand-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: rgba(109, 40, 217, 0.16);
+  color: var(--accent-hover);
+  flex-shrink: 0;
+}
+.shadowing-brand-icon svg {
+  width: 18px;
+  height: 18px;
+}
+.shadowing-brand-text {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+/* Levels — separate blank panel */
+.level-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 10px;
+}
 .level-sidebar-head {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--muted);
   font-weight: 600;
-  padding: 4px 12px 12px;
+  padding: 4px 8px 10px;
 }
 
 .level-menu {
@@ -4456,7 +4493,7 @@ body.modal-open { overflow: hidden; }
 
 /* Mobile (≤768px): hide sidebar, show horizontal scrollable pills */
 @media (max-width: 768px) {
-  .shadowing-topbar { flex-wrap: wrap; gap: 10px; padding: 16px 0 12px; }
+  .shadowing-topbar { flex-wrap: wrap; gap: 10px; padding: 24px 0 12px; }
   .shadowing-search { flex: 1 1 100%; }
   .shadowing-sort { flex: 1 1 100%; }
   .shadowing-sort select { width: 100%; }
@@ -4467,7 +4504,15 @@ body.modal-open { overflow: hidden; }
   .level-sidebar {
     position: static;
     width: 100%;
-    /* edge-to-edge scroll without breaking the container's horizontal padding */
+  }
+  .shadowing-brand { padding: 0 0 12px; }
+  .shadowing-brand-text { font-size: 20px; }
+
+  /* Panel drops its card chrome so pills can scroll edge-to-edge */
+  .level-panel {
+    background: transparent;
+    border: none;
+    padding: 0;
     margin-left: -16px;
     margin-right: -16px;
     width: calc(100% + 32px);
