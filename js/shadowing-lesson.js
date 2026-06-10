@@ -636,6 +636,41 @@
         }
       });
     });
+
+    // --- Practice Mode presets -------------------------------------------
+    // A convenience layer ABOVE the existing controls. Each preset drives the
+    // existing speed/toggle controls through their own click handlers, so those
+    // controls stay the single source of truth — nothing here modifies them.
+    (function wirePracticeModes() {
+      const panel = $('practice-mode');
+      if (!panel) return;
+      const MODES = {
+        listen: { speed: '1',    shadow: false, autopause: false, repeat: false },
+        shadow: { speed: '1',    shadow: true,  autopause: true,  repeat: false },
+        slow:   { speed: '0.75', shadow: true,  autopause: true,  repeat: false },
+        loop:   { speed: '1',    shadow: false, autopause: false, repeat: true  }
+      };
+      const isOn = (id) => { const el = $(id); return !!(el && el.classList.contains('active')); };
+      const ensure = (id, want) => { const el = $(id); if (el && isOn(id) !== want) el.click(); };
+      function setSpeed(sp) {
+        const b = document.querySelector(`.ctrl-speed[data-speed="${sp}"]`);
+        if (b && !b.classList.contains('active')) b.click();
+      }
+      function applyMode(key) {
+        const m = MODES[key];
+        if (!m) return;
+        setSpeed(m.speed);
+        ensure('shadow-mode', m.shadow);
+        ensure('repeat-sentence', m.repeat);
+        ensure('repeat-all', false);
+        ensure('auto-pause', m.autopause);
+        panel.querySelectorAll('[data-mode]').forEach(b =>
+          b.classList.toggle('active', b.dataset.mode === key));
+      }
+      panel.querySelectorAll('[data-mode]').forEach(btn => {
+        btn.addEventListener('click', () => applyMode(btn.dataset.mode));
+      });
+    })();
   }
 
   // --- YouTube IFrame API ------------------------------------------------

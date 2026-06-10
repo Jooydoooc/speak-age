@@ -2295,15 +2295,24 @@ body.modal-open { overflow: hidden; }
 
 .lesson-thumb-badge {
   position: absolute; top: 10px; right: 10px;
+  z-index: 2;
   background: rgba(20,184,166,0.9); color: #022;
   font-size: 11px; font-weight: 600;
   padding: 4px 10px; border-radius: 999px;
 }
+/* Level badge floated over the thumbnail (top-left), above the hover dim */
+.lesson-thumb-level {
+  position: absolute; top: 10px; left: 10px;
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
 
-/* Body */
+/* Body — a link to the lesson player; clicking the content opens the lesson */
 .lesson-card-body {
   display: flex; flex-direction: column; gap: 8px;
   padding: 14px 16px 4px;
+  text-decoration: none;
+  color: inherit;
 }
 .lesson-card .card-title { font-size: 15px; line-height: 1.35; }
 .lesson-card .card-meta {
@@ -2349,6 +2358,21 @@ body.modal-open { overflow: hidden; }
   transition: background 0.15s;
 }
 .btn-start:hover { background: var(--accent-hover); }
+
+/* Share — compact icon button that copies the lesson link */
+.btn-share {
+  flex: 0 0 auto;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 40px; min-height: 40px;
+  background: transparent;
+  border: 1px solid #2a2a40;
+  color: var(--muted);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.btn-share:hover { border-color: var(--accent); color: var(--text); background: rgba(109,40,217,0.08); }
+.btn-share svg { width: 16px; height: 16px; }
 
 /* =========================================================
    LESSON PREVIEW MODAL
@@ -2428,7 +2452,8 @@ body.modal-open { overflow: hidden; }
   }
   .lesson-card-actions { flex-direction: column; }
   .lesson-card-actions .btn-preview,
-  .lesson-card-actions .btn-start { width: 100%; min-height: 48px; }
+  .lesson-card-actions .btn-start,
+  .lesson-card-actions .btn-share { width: 100%; min-height: 48px; }
   .preview-modal-actions { flex-direction: column-reverse; }
   .preview-modal-actions .btn-preview-close,
   .preview-modal-actions .btn-start { width: 100%; min-height: 48px; }
@@ -2593,6 +2618,46 @@ body.modal-open { overflow: hidden; }
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
   color: var(--muted); font-size: 14px;
+}
+
+/* Practice Mode panel — sits above the controls, drives them via presets */
+.practice-mode {
+  margin-top: 16px;
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+.practice-mode-label {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--muted);
+}
+.practice-mode-options { display: flex; gap: 8px; flex-wrap: wrap; }
+.practice-mode-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 0 14px; min-height: 40px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  border-radius: var(--radius-pill);
+  font-size: 13px; font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.practice-mode-btn:hover { border-color: var(--accent); color: var(--text); }
+.practice-mode-btn.active {
+  background: var(--accent); border-color: var(--accent); color: #fff;
+}
+.practice-mode-icon { font-size: 14px; line-height: 1; }
+@media (max-width: 768px) {
+  .practice-mode-options {
+    width: 100%;
+    flex-wrap: nowrap; overflow-x: auto;
+    -webkit-overflow-scrolling: touch; scrollbar-width: none;
+  }
+  .practice-mode-options::-webkit-scrollbar { display: none; }
+  .practice-mode-btn { flex-shrink: 0; min-height: 44px; }
 }
 
 .lesson-controls {

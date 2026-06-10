@@ -44,7 +44,33 @@
 
   function metaLine(l) {
     const sc = Number(l.sentence_count || 0);
-    return [esc(l.duration || ''), sc ? `${sc} sentences` : ''].filter(Boolean).join(' · ');
+    return [esc(l.topic || ''), esc(l.duration || ''), sc ? `${sc} sentences` : '']
+      .filter(Boolean).join(' · ');
+  }
+
+  // Copy a lesson link to the clipboard (or open the native share sheet on mobile).
+  function shareLesson(l, url) {
+    if (navigator.share) {
+      navigator.share({ title: l ? l.title : 'Shadowing lesson', url }).catch(() => {});
+      return;
+    }
+    const done = () => window.toast && window.toast('Lesson link copied');
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(done).catch(() => fallbackCopy(url, done));
+    } else {
+      fallbackCopy(url, done);
+    }
+  }
+  function fallbackCopy(text, cb) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); } catch (_) {}
+    document.body.removeChild(ta);
+    cb && cb();
   }
 
   async function load() {
@@ -96,6 +122,7 @@
       const pc = Number(l.practiced_count || 0);
       const pct = sc > 0 ? Math.round((pc / sc) * 100) : 0;
       const meta = metaLine(l);
+      const cta = l.completed ? 'Review →' : (pct > 0 ? 'Continue →' : 'Start lesson →');
       return `
         <div class="card lesson-card" data-id="${l.id}">
           <button class="lesson-thumb" type="button" data-preview aria-label="Preview: ${esc(l.title)}">
@@ -103,23 +130,23 @@
               ? `<img src="${esc(thumb)}" alt="" loading="lazy"${hq ? ` onerror="this.onerror=null;this.src='${hq}'"` : ''}>`
               : '<div class="lesson-thumb-fallback"></div>'}
             <span class="lesson-thumb-overlay"><span class="lesson-thumb-play" aria-hidden="true">▶</span></span>
+            <span class="badge badge-level-${l.level} lesson-thumb-level">${esc(l.level)}</span>
             ${l.completed ? '<span class="lesson-thumb-badge">Completed ✓</span>' : ''}
           </button>
-          <div class="lesson-card-body">
+          <a class="lesson-card-body" href="/shadowing-lesson.html?id=${l.id}">
             <div class="card-title">${esc(l.title)}</div>
-            <div class="card-meta">
-              <span class="badge badge-level-${l.level}">${esc(l.level)}</span>
-              ${meta ? `<span class="card-meta-text">· ${meta}</span>` : ''}
+            ${meta ? `<div class="card-meta"><span class="card-meta-text">${meta}</span></div>` : ''}
+            <div class="lesson-card-progress">
+              <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+              <span class="progress-pct">${pct}%</span>
             </div>
-            ${sc > 0 ? `
-              <div class="lesson-card-progress">
-                <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-                <span class="progress-pct">${pct}%</span>
-              </div>` : ''}
-          </div>
+          </a>
           <div class="lesson-card-actions">
             <button class="btn-preview" type="button" data-preview>▶ Preview</button>
-            <a class="btn-start" href="/shadowing-lesson.html?id=${l.id}">Start lesson →</a>
+            <a class="btn-start" href="/shadowing-lesson.html?id=${l.id}">${cta}</a>
+            <button class="btn-share" type="button" data-share aria-label="Share lesson link">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+            </button>
           </div>
         </div>`;
     }).join('');
@@ -174,8 +201,19 @@
     document.body.classList.remove('modal-open');
   }
 
-  // Open preview from a thumbnail or Preview button (event delegation).
+  // Card actions (event delegation): Share copies/shares the link; thumbnail
+  // and Preview button open the preview modal. The body link + Start button are
+  // plain anchors that navigate to the lesson player.
   lessonsEl.addEventListener('click', (e) => {
+    const shareBtn = e.target.closest('[data-share]');
+    if (shareBtn) {
+      const card = shareBtn.closest('[data-id]');
+      if (!card) return;
+      const id = card.getAttribute('data-id');
+      const lesson = lessons.find(l => String(l.id) === id);
+      shareLesson(lesson, `${location.origin}/shadowing-lesson.html?id=${id}`);
+      return;
+    }
     const trigger = e.target.closest('[data-preview]');
     if (!trigger) return;
     const card = trigger.closest('[data-id]');
