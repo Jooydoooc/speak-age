@@ -78,23 +78,16 @@
         </div>
       </div>
 
-      <!-- Practice Mode: quick presets that drive the controls below -->
-      <div class="practice-mode" id="practice-mode" role="group" aria-label="Practice mode">
+      <!-- Practice Mode: changes the on-screen instruction only (does not touch the controls below) -->
+      <div class="practice-mode" id="practice-mode" aria-label="Practice mode">
         <span class="practice-mode-label">Practice Mode</span>
-        <div class="practice-mode-options">
-          <button type="button" class="practice-mode-btn" data-mode="listen">
-            <span class="practice-mode-icon" aria-hidden="true">🎧</span> Listen
-          </button>
-          <button type="button" class="practice-mode-btn" data-mode="shadow">
-            <span class="practice-mode-icon" aria-hidden="true">🗣️</span> Shadow
-          </button>
-          <button type="button" class="practice-mode-btn" data-mode="slow">
-            <span class="practice-mode-icon" aria-hidden="true">🐢</span> Slow
-          </button>
-          <button type="button" class="practice-mode-btn" data-mode="loop">
-            <span class="practice-mode-icon" aria-hidden="true">🔂</span> Loop
-          </button>
+        <div class="practice-mode-options" role="tablist" aria-label="Practice mode">
+          <button type="button" class="practice-mode-btn active" data-mode="listen" role="tab" aria-selected="true">Listen</button>
+          <button type="button" class="practice-mode-btn" data-mode="repeat" role="tab" aria-selected="false">Repeat</button>
+          <button type="button" class="practice-mode-btn" data-mode="shadow" role="tab" aria-selected="false">Shadow</button>
+          <button type="button" class="practice-mode-btn" data-mode="record" role="tab" aria-selected="false">Record</button>
         </div>
+        <p class="practice-mode-hint" id="practice-mode-hint">Listen carefully without speaking. Focus on rhythm and intonation.</p>
       </div>
 
       <div class="lesson-controls">

@@ -637,38 +637,30 @@
       });
     });
 
-    // --- Practice Mode presets -------------------------------------------
-    // A convenience layer ABOVE the existing controls. Each preset drives the
-    // existing speed/toggle controls through their own click handlers, so those
-    // controls stay the single source of truth — nothing here modifies them.
+    // --- Practice Mode panel ---------------------------------------------
+    // Sits ABOVE the existing controls and only swaps the on-screen instruction
+    // + active pill style. It intentionally does NOT touch the speed/repeat/
+    // auto-pause/shadow controls. (Record is a label only — no recording yet.)
     (function wirePracticeModes() {
       const panel = $('practice-mode');
       if (!panel) return;
-      const MODES = {
-        listen: { speed: '1',    shadow: false, autopause: false, repeat: false },
-        shadow: { speed: '1',    shadow: true,  autopause: true,  repeat: false },
-        slow:   { speed: '0.75', shadow: true,  autopause: true,  repeat: false },
-        loop:   { speed: '1',    shadow: false, autopause: false, repeat: true  }
+      const hint = $('practice-mode-hint');
+      const HINTS = {
+        listen: 'Listen carefully without speaking. Focus on rhythm and intonation.',
+        repeat: 'Pause after each sentence and repeat clearly.',
+        shadow: 'Speak together with the speaker. Copy rhythm, stress, and speed.',
+        record: 'Record yourself and compare your answer with the original.'
       };
-      const isOn = (id) => { const el = $(id); return !!(el && el.classList.contains('active')); };
-      const ensure = (id, want) => { const el = $(id); if (el && isOn(id) !== want) el.click(); };
-      function setSpeed(sp) {
-        const b = document.querySelector(`.ctrl-speed[data-speed="${sp}"]`);
-        if (b && !b.classList.contains('active')) b.click();
-      }
-      function applyMode(key) {
-        const m = MODES[key];
-        if (!m) return;
-        setSpeed(m.speed);
-        ensure('shadow-mode', m.shadow);
-        ensure('repeat-sentence', m.repeat);
-        ensure('repeat-all', false);
-        ensure('auto-pause', m.autopause);
-        panel.querySelectorAll('[data-mode]').forEach(b =>
-          b.classList.toggle('active', b.dataset.mode === key));
-      }
       panel.querySelectorAll('[data-mode]').forEach(btn => {
-        btn.addEventListener('click', () => applyMode(btn.dataset.mode));
+        btn.addEventListener('click', () => {
+          const key = btn.dataset.mode;
+          panel.querySelectorAll('[data-mode]').forEach(b => {
+            const on = b === btn;
+            b.classList.toggle('active', on);
+            b.setAttribute('aria-selected', on ? 'true' : 'false');
+          });
+          if (hint && HINTS[key]) hint.textContent = HINTS[key];
+        });
       });
     })();
   }
