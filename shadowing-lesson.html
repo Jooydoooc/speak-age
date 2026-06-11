@@ -147,6 +147,32 @@
 
     <div class="lesson-transcript-col">
 
+      <!-- How to practise — collapsible; remembers state in localStorage -->
+      <details class="practise-box" id="practise-box" open>
+        <summary class="practise-box-summary">
+          <span class="practise-box-title">How to practise</span>
+          <span class="practise-box-toggle" aria-hidden="true"></span>
+        </summary>
+        <ol class="practise-box-steps">
+          <li>🎧 Listen once without reading.</li>
+          <li>🔁 Play each sentence and repeat after the speaker.</li>
+          <li>🗣 Turn on Shadow Mode and speak together with the speaker.</li>
+          <li>🎙 Record yourself and compare your rhythm.</li>
+          <li>✅ Mark the lesson complete when you finish.</li>
+        </ol>
+      </details>
+      <script>
+        (function () {
+          var box = document.getElementById('practise-box');
+          if (!box) return;
+          var KEY = 'shadowing.practiseBox.open';
+          if (localStorage.getItem(KEY) === 'false') box.open = false;
+          box.addEventListener('toggle', function () {
+            localStorage.setItem(KEY, box.open ? 'true' : 'false');
+          });
+        })();
+      </script>
+
       <div class="transcript-progress">
         <div class="transcript-progress-bar"><div class="transcript-progress-fill" id="lesson-fill" style="width:0%"></div></div>
         <div class="transcript-progress-text" id="lesson-progress-text">0 / 0 sentences</div>
