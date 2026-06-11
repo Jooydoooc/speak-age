@@ -88,6 +88,26 @@
           <button type="button" class="practice-mode-btn" data-mode="record" role="tab" aria-selected="false">Record</button>
         </div>
         <p class="practice-mode-hint" id="practice-mode-hint">Listen carefully without speaking. Focus on rhythm and intonation.</p>
+
+        <!-- Local recording panel — only shown in Record mode; nothing leaves the browser -->
+        <div class="record-panel" id="record-panel" hidden>
+          <div class="record-live" id="rec-live">
+            <div class="record-status">
+              <span class="record-dot" id="rec-dot" hidden></span>
+              <span class="record-status-text" id="rec-status">Ready</span>
+              <span class="record-timer" id="rec-timer">00:00</span>
+            </div>
+            <div class="record-controls" id="rec-controls">
+              <button type="button" class="record-btn record-start" id="rec-start">● Start</button>
+              <button type="button" class="record-btn record-stop" id="rec-stop" disabled>■ Stop</button>
+              <button type="button" class="record-btn record-play" id="rec-play" disabled>▶ Play</button>
+              <button type="button" class="record-btn record-delete" id="rec-delete" disabled>🗑 Delete</button>
+            </div>
+            <audio class="record-audio" id="rec-audio" controls hidden></audio>
+            <p class="record-note">Your recording stays in this browser until you leave the page.</p>
+          </div>
+          <p class="record-unsupported" id="rec-unsupported" hidden></p>
+        </div>
       </div>
 
       <div class="lesson-controls">

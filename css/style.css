@@ -2657,7 +2657,59 @@ body.modal-open { overflow: hidden; }
   line-height: 1.5;
   color: var(--muted);
 }
+
+/* Local recording panel (Record mode only) */
+.record-panel {
+  flex-basis: 100%;
+  margin-top: 10px;
+  padding: 14px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.record-status { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.record-status-text { font-size: 13px; font-weight: 600; color: var(--text); }
+.record-timer {
+  margin-left: auto;
+  font-size: 14px; color: var(--muted);
+  font-variant-numeric: tabular-nums; font-feature-settings: 'tnum';
+}
+.record-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 0 0 rgba(239,68,68,0.55);
+  animation: recPulse 1.2s ease-out infinite;
+}
+@keyframes recPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(239,68,68,0.55); }
+  70%  { box-shadow: 0 0 0 8px rgba(239,68,68,0); }
+  100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+}
+.record-controls { display: flex; gap: 8px; flex-wrap: wrap; }
+.record-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 44px; padding: 0 16px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  font-size: 13px; font-weight: 600;
+  color: #fff; cursor: pointer;
+  transition: background 0.15s, opacity 0.15s, border-color 0.15s;
+}
+.record-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.record-start { background: #dc2626; }
+.record-start:not(:disabled):hover { background: #ef4444; }
+.record-stop { background: #3f3f46; }
+.record-stop:not(:disabled):hover { background: #52525b; }
+.record-play { background: var(--accent); }
+.record-play:not(:disabled):hover { background: var(--accent-hover); }
+.record-delete { background: transparent; border-color: #7f1d1d; color: #f87171; }
+.record-delete:not(:disabled):hover { background: rgba(127,29,29,0.18); }
+.record-audio { width: 100%; margin-top: 12px; }
+.record-note { margin: 12px 0 0; font-size: 12px; color: var(--muted); }
+.record-unsupported { margin: 0; font-size: 13px; line-height: 1.5; color: var(--muted); }
+
 @media (max-width: 768px) {
+  .record-btn { flex: 1 1 calc(50% - 4px); }
   .practice-mode-options {
     width: 100%;
     flex-wrap: nowrap; overflow-x: auto;

@@ -640,11 +640,13 @@
     // --- Practice Mode panel ---------------------------------------------
     // Sits ABOVE the existing controls and only swaps the on-screen instruction
     // + active pill style. It intentionally does NOT touch the speed/repeat/
-    // auto-pause/shadow controls. (Record is a label only — no recording yet.)
+    // auto-pause/shadow controls. Record mode reveals a local recording panel.
     (function wirePracticeModes() {
       const panel = $('practice-mode');
       if (!panel) return;
       const hint = $('practice-mode-hint');
+      const recordPanel = $('record-panel');
+      const recorder = setupRecorder();
       const HINTS = {
         listen: 'Listen carefully without speaking. Focus on rhythm and intonation.',
         repeat: 'Pause after each sentence and repeat clearly.',
@@ -660,9 +662,136 @@
             b.setAttribute('aria-selected', on ? 'true' : 'false');
           });
           if (hint && HINTS[key]) hint.textContent = HINTS[key];
+          if (recordPanel) {
+            const isRecord = key === 'record';
+            recordPanel.hidden = !isRecord;
+            // Leaving Record mode discards any in-progress/finished recording.
+            if (!isRecord && recorder) recorder.reset();
+          }
         });
       });
     })();
+
+    // --- Local recording panel (MediaRecorder) ---------------------------
+    // Browser-only: audio is held in a Blob in memory and never uploaded or
+    // saved. Microphone access is requested on the first Start click.
+    function setupRecorder() {
+      const panelEl = $('record-panel');
+      if (!panelEl) return null;
+      const liveEl = $('rec-live');
+      const startBtn = $('rec-start');
+      const stopBtn = $('rec-stop');
+      const playBtn = $('rec-play');
+      const delBtn = $('rec-delete');
+      const statusEl = $('rec-status');
+      const timerEl = $('rec-timer');
+      const dotEl = $('rec-dot');
+      const audioEl = $('rec-audio');
+      const unsupportedEl = $('rec-unsupported');
+
+      const supported = !!(navigator.mediaDevices &&
+        navigator.mediaDevices.getUserMedia && window.MediaRecorder);
+      if (!supported) {
+        // iOS Safari and other unsupported browsers: show a graceful message.
+        if (liveEl) liveEl.hidden = true;
+        if (unsupportedEl) {
+          unsupportedEl.hidden = false;
+          unsupportedEl.textContent =
+            'Recording is not supported on this browser. Please use Chrome on Android or desktop.';
+        }
+        return { reset() {} };
+      }
+
+      let mediaRecorder = null, chunks = [], stream = null;
+      let blobUrl = null, timerId = null, startTime = 0, discarding = false;
+
+      const fmt = (ms) => {
+        const s = Math.floor(ms / 1000);
+        return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+      };
+      const setStatus = (t) => { if (statusEl) statusEl.textContent = t; };
+      const setButtons = (s) => {
+        startBtn.disabled = !s.start;
+        stopBtn.disabled = !s.stop;
+        playBtn.disabled = !s.play;
+        delBtn.disabled = !s.del;
+      };
+      const stopStream = () => {
+        if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+      };
+      const clearRecording = () => {
+        if (blobUrl) { URL.revokeObjectURL(blobUrl); blobUrl = null; }
+        audioEl.pause();
+        audioEl.removeAttribute('src');
+        audioEl.hidden = true;
+        chunks = [];
+        timerEl.textContent = '00:00';
+      };
+
+      async function start() {
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        } catch (e) {
+          setStatus('Microphone blocked');
+          return;
+        }
+        clearRecording();
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.ondataavailable = (ev) => { if (ev.data && ev.data.size) chunks.push(ev.data); };
+        mediaRecorder.onstop = () => {
+          stopStream();
+          clearInterval(timerId);
+          dotEl.hidden = true;
+          if (discarding) { discarding = false; return; }
+          const blob = new Blob(chunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+          blobUrl = URL.createObjectURL(blob);
+          audioEl.src = blobUrl;
+          audioEl.hidden = false;
+          setStatus('Recorded');
+          setButtons({ start: true, stop: false, play: true, del: true });
+        };
+        mediaRecorder.start();
+        startTime = Date.now();
+        timerEl.textContent = '00:00';
+        timerId = setInterval(() => { timerEl.textContent = fmt(Date.now() - startTime); }, 250);
+        setStatus('Recording');
+        dotEl.hidden = false;
+        setButtons({ start: false, stop: true, play: false, del: false });
+      }
+
+      function stop() {
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+      }
+      function play() { if (blobUrl) { audioEl.currentTime = 0; audioEl.play(); } }
+      function del() {
+        clearRecording();
+        setStatus('Ready');
+        setButtons({ start: true, stop: false, play: false, del: false });
+      }
+
+      startBtn.addEventListener('click', start);
+      stopBtn.addEventListener('click', stop);
+      playBtn.addEventListener('click', play);
+      delBtn.addEventListener('click', del);
+
+      setStatus('Ready');
+      setButtons({ start: true, stop: false, play: false, del: false });
+
+      return {
+        reset() {
+          if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            discarding = true;
+            try { mediaRecorder.stop(); } catch (_) {}
+          }
+          stopStream();
+          if (timerId) clearInterval(timerId);
+          clearRecording();
+          dotEl.hidden = true;
+          setStatus('Ready');
+          setButtons({ start: true, stop: false, play: false, del: false });
+        }
+      };
+    }
   }
 
   // --- YouTube IFrame API ------------------------------------------------
