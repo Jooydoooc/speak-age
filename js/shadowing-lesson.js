@@ -640,11 +640,13 @@
     // --- Practice Mode panel ---------------------------------------------
     // Sits ABOVE the existing controls and only swaps the on-screen instruction
     // + active pill style. It intentionally does NOT touch the speed/repeat/
-    // auto-pause/shadow controls. (Record is a label only — no recording yet.)
+    // auto-pause/shadow controls. Record mode reveals a local recording panel.
     (function wirePracticeModes() {
       const panel = $('practice-mode');
       if (!panel) return;
       const hint = $('practice-mode-hint');
+      const recordPanel = $('record-panel');
+      const recorder = setupRecorder();
       const HINTS = {
         listen: 'Listen carefully without speaking. Focus on rhythm and intonation.',
         repeat: 'Pause after each sentence and repeat clearly.',
@@ -660,9 +662,177 @@
             b.setAttribute('aria-selected', on ? 'true' : 'false');
           });
           if (hint && HINTS[key]) hint.textContent = HINTS[key];
+          if (recordPanel) {
+            const isRecord = key === 'record';
+            recordPanel.hidden = !isRecord;
+            // Leaving Record mode discards any in-progress/finished recording.
+            if (!isRecord && recorder) recorder.reset();
+          }
         });
       });
     })();
+
+    // --- Local recording panel (MediaRecorder) ---------------------------
+    // Browser-only: audio is held in a Blob in memory and never uploaded or
+    // saved. Microphone access is requested on the first Start click.
+    function setupRecorder() {
+      const panelEl = $('record-panel');
+      if (!panelEl) return null;
+      const liveEl = $('rec-live');
+      const startBtn = $('rec-start');
+      const stopBtn = $('rec-stop');
+      const playBtn = $('rec-play');
+      const delBtn = $('rec-delete');
+      const statusEl = $('rec-status');
+      const timerEl = $('rec-timer');
+      const dotEl = $('rec-dot');
+      const audioEl = $('rec-audio');
+      const unsupportedEl = $('rec-unsupported');
+
+      const ua = navigator.userAgent;
+      // iPadOS 13+ masquerades as desktop Safari, so also check touch points.
+      const isIOS = /iPad|iPhone|iPod/.test(ua) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const isSafari = /^((?!chrome|android).)*safari/i.test(ua);
+
+      const showMessage = (text) => {
+        if (liveEl) liveEl.hidden = true;
+        if (unsupportedEl) { unsupportedEl.hidden = false; unsupportedEl.textContent = text; }
+      };
+
+      // iOS gained MediaRecorder in 14.5 — older iPhones get an update prompt.
+      if (isIOS) {
+        const m = ua.match(/OS (\d+)_(\d+)/);
+        const major = m ? +m[1] : 0;
+        const minor = m ? +m[2] : 0;
+        if (m && (major < 14 || (major === 14 && minor < 5))) {
+          showMessage('Please update your iPhone to iOS 14.5 or later to use recording.');
+          return { reset() {} };
+        }
+      }
+
+      // Any browser without the recording APIs (e.g. very old iOS) → graceful note.
+      if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder)) {
+        showMessage('Recording is not supported on this browser. Please use Chrome on Android or desktop.');
+        return { reset() {} };
+      }
+
+      // Pick a container/codec the current browser can actually record (Safari → mp4).
+      function getSupportedMimeType() {
+        const types = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg', ''];
+        for (const type of types) {
+          if (type === '' || (MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(type))) {
+            return type;
+          }
+        }
+        return '';
+      }
+      const fallbackType = (isIOS || isSafari) ? 'audio/mp4' : 'audio/webm';
+
+      let mediaRecorder = null, chunks = [], stream = null;
+      let blobUrl = null, timerId = null, startTime = 0, discarding = false;
+
+      const fmt = (ms) => {
+        const s = Math.floor(ms / 1000);
+        return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+      };
+      const setStatus = (t) => { if (statusEl) statusEl.textContent = t; };
+      const setButtons = (s) => {
+        startBtn.disabled = !s.start;
+        stopBtn.disabled = !s.stop;
+        playBtn.disabled = !s.play;
+        delBtn.disabled = !s.del;
+      };
+      const stopStream = () => {
+        if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+      };
+      const clearRecording = () => {
+        if (blobUrl) { URL.revokeObjectURL(blobUrl); blobUrl = null; }
+        audioEl.pause();
+        audioEl.removeAttribute('src');
+        audioEl.hidden = true;
+        chunks = [];
+        timerEl.textContent = '00:00';
+      };
+
+      async function start() {
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 44100 }
+          });
+        } catch (e) {
+          setStatus('Microphone blocked');
+          return;
+        }
+        clearRecording();
+        // Use a codec the browser supports; some iOS builds reject an options arg.
+        const mimeType = getSupportedMimeType();
+        try {
+          mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
+        } catch (e) {
+          mediaRecorder = new MediaRecorder(stream);
+        }
+        mediaRecorder.ondataavailable = (ev) => { if (ev.data && ev.data.size) chunks.push(ev.data); };
+        mediaRecorder.onstop = () => {
+          stopStream();
+          clearInterval(timerId);
+          dotEl.hidden = true;
+          if (discarding) { discarding = false; return; }
+          const blob = new Blob(chunks, { type: mediaRecorder.mimeType || mimeType || fallbackType });
+          blobUrl = URL.createObjectURL(blob);
+          audioEl.src = blobUrl;
+          audioEl.hidden = false;
+          setStatus('Recorded');
+          setButtons({ start: true, stop: false, play: true, del: true });
+        };
+        mediaRecorder.start();
+        startTime = Date.now();
+        timerEl.textContent = '00:00';
+        timerId = setInterval(() => { timerEl.textContent = fmt(Date.now() - startTime); }, 250);
+        setStatus('Recording');
+        dotEl.hidden = false;
+        setButtons({ start: false, stop: true, play: false, del: false });
+      }
+
+      function stop() {
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+      }
+      function play() {
+        if (!blobUrl) return;
+        // Triggered directly by the Play tap (user gesture) — required for iOS.
+        try { audioEl.currentTime = 0; } catch (_) {}
+        const p = audioEl.play();
+        if (p && p.catch) p.catch(() => {});
+      }
+      function del() {
+        clearRecording();
+        setStatus('Ready');
+        setButtons({ start: true, stop: false, play: false, del: false });
+      }
+
+      startBtn.addEventListener('click', start);
+      stopBtn.addEventListener('click', stop);
+      playBtn.addEventListener('click', play);
+      delBtn.addEventListener('click', del);
+
+      setStatus('Ready');
+      setButtons({ start: true, stop: false, play: false, del: false });
+
+      return {
+        reset() {
+          if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            discarding = true;
+            try { mediaRecorder.stop(); } catch (_) {}
+          }
+          stopStream();
+          if (timerId) clearInterval(timerId);
+          clearRecording();
+          dotEl.hidden = true;
+          setStatus('Ready');
+          setButtons({ start: true, stop: false, play: false, del: false });
+        }
+      };
+    }
   }
 
   // --- YouTube IFrame API ------------------------------------------------
