@@ -197,6 +197,43 @@
   }
 
   // --- Renders -----------------------------------------------------------
+  // Pronunciation focus tags — frontend-only for now (hardcoded per lesson).
+  // Matched by lesson id or a slug derived from the title; falls back to default.
+  const focusTags = {
+    "default": ["sentence stress", "intonation"],
+    "secrets-of-success": ["word stress", "natural pauses", "linking sounds"],
+    "talking-about-food": ["weak forms", "intonation"]
+  };
+  function slugify(s) {
+    return String(s || '').toLowerCase().trim()
+      .replace(/[^\w\s-]/g, '')   // drop punctuation
+      .replace(/\s+/g, '-')        // spaces → hyphens
+      .replace(/-+/g, '-');
+  }
+  function tagsForLesson(l) {
+    if (l && focusTags[String(l.id)]) return focusTags[String(l.id)];
+    const slug = slugify(l && l.title);
+    if (focusTags[slug]) return focusTags[slug];
+    // Partial match so long titles still hit a known key (e.g. "secrets-of-success-…").
+    const key = Object.keys(focusTags).find(k => k !== 'default' && slug.includes(k));
+    return key ? focusTags[key] : focusTags.default;
+  }
+  function renderFocusTags() {
+    const row = $('lesson-focus');
+    const wrap = $('lesson-focus-tags');
+    if (!row || !wrap) return;
+    const tags = tagsForLesson(lesson);
+    wrap.textContent = '';
+    if (!tags || !tags.length) { row.hidden = true; return; }
+    tags.forEach(t => {
+      const pill = document.createElement('span');
+      pill.className = 'lesson-focus-tag';
+      pill.textContent = t;
+      wrap.appendChild(pill);
+    });
+    row.hidden = false;
+  }
+
   function renderHeader() {
     document.title = `${lesson.title} — Shadowing — Speak_Age`;
     $('lesson-title').textContent = lesson.title;
@@ -210,6 +247,7 @@
 
     const mins = estimatePracticeMinutes(sentences);
     $('lesson-practice-time').textContent = mins ? `~${mins} min practice` : '';
+    renderFocusTags();
     renderCompleteButton();
     renderStars();
   }
