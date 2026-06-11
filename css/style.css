@@ -2492,6 +2492,24 @@ body.modal-open { overflow: hidden; }
 .lesson-meta-item { font-size: 13px; color: var(--muted); }
 .lesson-meta-time { color: var(--accent-hover); font-weight: 500; }
 
+/* Pronunciation focus tags (under the title/meta) */
+.lesson-focus {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.lesson-focus-label { font-size: 11px; color: var(--muted); }
+.lesson-focus-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.lesson-focus-tag {
+  font-size: 11px;
+  color: #a78bfa;
+  background: #1a1a2e;
+  border: 0.5px solid #2a2a40;
+  padding: 3px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
 .lesson-rating {
   display: inline-flex;
   align-items: center;
