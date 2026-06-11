@@ -689,18 +689,45 @@
       const audioEl = $('rec-audio');
       const unsupportedEl = $('rec-unsupported');
 
-      const supported = !!(navigator.mediaDevices &&
-        navigator.mediaDevices.getUserMedia && window.MediaRecorder);
-      if (!supported) {
-        // iOS Safari and other unsupported browsers: show a graceful message.
+      const ua = navigator.userAgent;
+      // iPadOS 13+ masquerades as desktop Safari, so also check touch points.
+      const isIOS = /iPad|iPhone|iPod/.test(ua) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const isSafari = /^((?!chrome|android).)*safari/i.test(ua);
+
+      const showMessage = (text) => {
         if (liveEl) liveEl.hidden = true;
-        if (unsupportedEl) {
-          unsupportedEl.hidden = false;
-          unsupportedEl.textContent =
-            'Recording is not supported on this browser. Please use Chrome on Android or desktop.';
+        if (unsupportedEl) { unsupportedEl.hidden = false; unsupportedEl.textContent = text; }
+      };
+
+      // iOS gained MediaRecorder in 14.5 — older iPhones get an update prompt.
+      if (isIOS) {
+        const m = ua.match(/OS (\d+)_(\d+)/);
+        const major = m ? +m[1] : 0;
+        const minor = m ? +m[2] : 0;
+        if (m && (major < 14 || (major === 14 && minor < 5))) {
+          showMessage('Please update your iPhone to iOS 14.5 or later to use recording.');
+          return { reset() {} };
         }
+      }
+
+      // Any browser without the recording APIs (e.g. very old iOS) → graceful note.
+      if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder)) {
+        showMessage('Recording is not supported on this browser. Please use Chrome on Android or desktop.');
         return { reset() {} };
       }
+
+      // Pick a container/codec the current browser can actually record (Safari → mp4).
+      function getSupportedMimeType() {
+        const types = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg', ''];
+        for (const type of types) {
+          if (type === '' || (MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(type))) {
+            return type;
+          }
+        }
+        return '';
+      }
+      const fallbackType = (isIOS || isSafari) ? 'audio/mp4' : 'audio/webm';
 
       let mediaRecorder = null, chunks = [], stream = null;
       let blobUrl = null, timerId = null, startTime = 0, discarding = false;
@@ -730,20 +757,28 @@
 
       async function start() {
         try {
-          stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          stream = await navigator.mediaDevices.getUserMedia({
+            audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 44100 }
+          });
         } catch (e) {
           setStatus('Microphone blocked');
           return;
         }
         clearRecording();
-        mediaRecorder = new MediaRecorder(stream);
+        // Use a codec the browser supports; some iOS builds reject an options arg.
+        const mimeType = getSupportedMimeType();
+        try {
+          mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
+        } catch (e) {
+          mediaRecorder = new MediaRecorder(stream);
+        }
         mediaRecorder.ondataavailable = (ev) => { if (ev.data && ev.data.size) chunks.push(ev.data); };
         mediaRecorder.onstop = () => {
           stopStream();
           clearInterval(timerId);
           dotEl.hidden = true;
           if (discarding) { discarding = false; return; }
-          const blob = new Blob(chunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+          const blob = new Blob(chunks, { type: mediaRecorder.mimeType || mimeType || fallbackType });
           blobUrl = URL.createObjectURL(blob);
           audioEl.src = blobUrl;
           audioEl.hidden = false;
@@ -762,7 +797,13 @@
       function stop() {
         if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
       }
-      function play() { if (blobUrl) { audioEl.currentTime = 0; audioEl.play(); } }
+      function play() {
+        if (!blobUrl) return;
+        // Triggered directly by the Play tap (user gesture) — required for iOS.
+        try { audioEl.currentTime = 0; } catch (_) {}
+        const p = audioEl.play();
+        if (p && p.catch) p.catch(() => {});
+      }
       function del() {
         clearRecording();
         setStatus('Ready');
