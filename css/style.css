@@ -2872,6 +2872,38 @@ body.modal-open { overflow: hidden; }
   white-space: nowrap;
 }
 
+/* "How to practise" collapsible box (between player and transcript) */
+.practise-box {
+  background: #1a1a2e;
+  border: 0.5px solid #2a2a40;
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+}
+.practise-box-summary {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+  list-style: none;
+}
+.practise-box-summary::-webkit-details-marker { display: none; }
+.practise-box-title {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--muted);
+}
+.practise-box-toggle::before {
+  content: '▼';
+  font-size: 10px; color: var(--muted);
+}
+.practise-box[open] .practise-box-toggle::before { content: '▲'; }
+.practise-box-steps {
+  margin: 10px 0 2px;
+  padding-left: 22px;
+  font-size: 13px; line-height: 1.8;
+  color: var(--text);
+}
+.practise-box-steps li::marker { color: var(--muted); }
+
 /* Transcript panel + progress bar */
 .transcript-progress {
   display: flex;
@@ -3156,6 +3188,7 @@ body.modal-open { overflow: hidden; }
   .speed-strip .ctrl-speed { flex-shrink: 0; height: 44px; }
 
   .lesson-controls     { order: 4; margin-top: 0; }
+  .practise-box        { order: 5; width: 100%; }
   .transcript-head     { order: 5; margin-top: 4px; }
   .transcript-list     { order: 6; max-height: 50vh; }
   .key-phrases-panel   { order: 7; margin-top: 0; }
