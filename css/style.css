@@ -2963,17 +2963,14 @@ body.modal-open { overflow: hidden; }
   border-radius: 8px;
   cursor: pointer;
   line-height: 1.55;
-  transition: background 0.12s, opacity 0.15s;
-  min-height: 44px;
-  opacity: 0.5;
+  transition: background 0.15s;
+  min-height: 48px;
 }
-.t-sentence:hover { background: var(--card); opacity: 1; }
-.t-sentence.practiced { opacity: 1; }
+.t-sentence:hover { background: #1a1a2e; }
 .t-sentence.current,
 .t-sentence.single-play {
-  opacity: 1;
-  background: rgba(109,40,217,0.14);
-  box-shadow: inset 3px 0 0 var(--accent-hover);
+  background: #1a0a2e;
+  box-shadow: inset 3px 0 0 #6d28d9;
 }
 
 /* Per-sentence play + slow buttons */
@@ -2990,7 +2987,7 @@ body.modal-open { overflow: hidden; }
   background: var(--card);
   border: 1px solid var(--border);
   color: var(--text);
-  font-size: 10px;
+  font-size: 14px;
   line-height: 1;
   cursor: pointer;
   transition: background 0.12s, border-color 0.12s, color 0.12s, transform 0.08s, opacity 0.12s;
@@ -3027,14 +3024,23 @@ body.modal-open { overflow: hidden; }
   pointer-events: auto;
 }
 .t-ts {
-  color: var(--muted);
+  color: #52525b;
   font-family: ui-monospace, 'SF Mono', Menlo, monospace;
-  font-size: 12px;
+  font-size: 11px;
+  min-width: 36px;
   padding-top: 3px;
   flex-shrink: 0;
 }
-.t-sentence.current .t-ts { color: var(--accent-hover); }
-.t-text { font-size: 15px; color: var(--text); }
+.t-text {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text);
+  opacity: 0.45; /* upcoming sentences dimmed — focus stays on current */
+  transition: opacity 0.15s;
+}
+.t-sentence.practiced .t-text { opacity: 0.6; }
+.t-sentence.current .t-text,
+.t-sentence.single-play .t-text { color: #ffffff; opacity: 1; }
 
 /* --- Word-level IPA pronunciation tooltip ------------------------------ */
 .t-text .word {
@@ -3095,7 +3101,7 @@ body.modal-open { overflow: hidden; }
   border-bottom-color: #6d28d9;
 }
 .t-tick {
-  color: #fafafa;
+  color: #ffffff;
   opacity: 0;
   font-size: 14px;
   align-self: center;
@@ -3103,12 +3109,24 @@ body.modal-open { overflow: hidden; }
 }
 .t-sentence.practiced .t-tick { opacity: 1; }
 
-/* Shadow mode — blank out sentence text unless revealed */
+/* Shadow mode — replace hidden sentence text with a blank placeholder */
 .transcript-list.shadow-mode-on .t-sentence:not(.revealed) .t-text {
-  color: transparent;
-  background: linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
-  border-radius: 4px;
+  font-size: 0;
   user-select: none;
+}
+.transcript-list.shadow-mode-on .t-sentence:not(.revealed) .t-text::before {
+  content: "_ _ _ _ _";
+  font-size: 15px;
+  letter-spacing: 1px;
+  color: var(--muted);
+}
+/* Revealed sentence: show text with a purple underline to set it apart */
+.transcript-list.shadow-mode-on .t-sentence.revealed .t-text {
+  text-decoration: underline;
+  text-decoration-color: #6d28d9;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+  opacity: 1;
 }
 
 /* =========================================================
